@@ -16,9 +16,9 @@
 #define V_NOISE 1.0
 
 #define RAND() ((double)rand() / (RAND_MAX - 1) - 0.5)
-#define SCRAND(scale) ((scale) * RAND())
+#define SCRAND(scale) ((scale)*RAND())
 #define NOISE(scale) SCRAND((scale))
-#define MIN(a,b) ((a) > (b) ? (b) : (a))
+#define MIN(a, b) ((a) > (b) ? (b) : (a))
 
 /**
  * This test emulates an entity moving in a straight line. Its sensors yield
@@ -65,14 +65,8 @@ int main(void)
         position += velocity * DT;
         velocity += acceleration * DT;
         velocity = MIN(V_MAX, velocity);
-        printf(
-                "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
-                position, velocity, acceleration,
-                x_pred, v_pred, a_pred,
-                z_x, z_v,
-                x, v, a
-        );
-
+        printf("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", position, velocity, acceleration, x_pred, v_pred, a_pred, z_x, z_v,
+               x, v, a);
     }
 
     gh_free(&filter);
