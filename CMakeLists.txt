@@ -18,6 +18,7 @@ file(GLOB SRC_FILES src/*.c)
 
 macro(binary prog_name prog_src)
     add_executable(${prog_name} ${prog_src} ${SRC_FILES})
+    target_link_libraries(${prog_name} m)
 endmacro()
 
 binary(test_gh tests/test_gh.c)

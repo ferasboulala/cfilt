@@ -9,7 +9,7 @@
  * There are assumptions made with this filters. First, when tracking an set of state variables,
  * all intermediary variables will be tracked. For example, if we wish to track position and
  * acceleration, velocity will be tracked too. This is enforced by requiring a dimension for
- * the filter (dim := difference between the highest and lowest order variables).
+ * the filter (dim := difference between the highest and lowest order variables + 1).
  *
  * When predicting the value of a state variable, we use all the higher order variables to do so.
  * That is, x_pred_i = x_i + dt * x_(i+1) + dt^2 * x_(i+2) * 1/2 + ... + dt^(n-i-1) * x_n * 1/(n-i-1)!.
@@ -46,14 +46,14 @@ struct gh_filter
     // Number of tracked variables in the filter.
     size_t dim;
 
-    // Array representing whether or not we had data for a state variable.
+    // Array representing whether or not we had data for a state variable. It is private.
     char *upd_;
-    // Data.
+    // Data. It is private.
     double *z_;
 };
 
 // Initializes the internal variables of the gh filter structure.
-void gh_init(struct gh_filter *filt, size_t dim);
+void gh_alloc(struct gh_filter *filt, size_t dim);
 
 // Frees the ressources associated with the gh filter object.
 void gh_free(struct gh_filter *filt);

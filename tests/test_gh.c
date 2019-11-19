@@ -3,8 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
-#define N_STEPS 100
+#define N_STEPS 1000
 #define DT 0.1
 #define X0 0.0
 #define V0 0.0
@@ -18,7 +19,6 @@
 #define RAND() ((double)rand() / (RAND_MAX - 1) - 0.5)
 #define SCRAND(scale) ((scale)*RAND())
 #define NOISE(scale) SCRAND((scale))
-#define MIN(a, b) ((a) > (b) ? (b) : (a))
 
 /**
  * This test emulates an entity moving in a straight line. Its sensors yield
@@ -27,7 +27,7 @@
 int main(void)
 {
     struct gh_filter filter;
-    gh_init(&filter, 3);
+    gh_alloc(&filter, 3);
 
     srand(time(NULL));
 
@@ -43,7 +43,7 @@ int main(void)
     filter.gh[1] = 0.25;
     filter.gh[2] = 0.5;
 
-    printf("x,v,a,x_pred,v_pred,a_pred,z_x,z_v,x_,v_,a_\n");
+    printf("x,v,a,x_pred,v_pred,a_pred,z_x,z_v,x_,v_,a_,e_x,e_v,e_a\n");
 
     for (int i = 0; i < N_STEPS; ++i)
     {
@@ -64,9 +64,14 @@ int main(void)
 
         position += velocity * DT;
         velocity += acceleration * DT;
-        velocity = MIN(V_MAX, velocity);
-        printf("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", position, velocity, acceleration, x_pred, v_pred, a_pred, z_x, z_v,
-               x, v, a);
+        velocity = fmin(V_MAX, velocity);
+
+        const double e_x = position - filter.x[0];
+        const double e_v = velocity - filter.x[1];
+        const double e_a = acceleration - filter.x[2];
+
+        printf("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", position, velocity, acceleration, x_pred, v_pred, a_pred, z_x, z_v,
+               x, v, a, e_x, e_v, e_a);
     }
 
     gh_free(&filter);

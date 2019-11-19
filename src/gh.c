@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void gh_init(struct gh_filter *filt, size_t dim)
+void gh_alloc(struct gh_filter *filt, size_t dim)
 {
     filt->dim = dim;
     filt->gh = malloc(dim * sizeof(double));
