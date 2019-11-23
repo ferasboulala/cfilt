@@ -13,8 +13,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 project(cfilt C)
 
-include_directories(src)
-file(GLOB SRC_FILES src/*.c)
+include_directories(.)
+file(GLOB SRC_FILES cfilt/*.c)
 
 macro(binary prog_name prog_src)
     add_executable(${prog_name} ${prog_src} ${SRC_FILES})

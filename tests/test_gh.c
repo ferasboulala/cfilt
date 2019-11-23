@@ -1,4 +1,4 @@
-#include "gh.h"
+#include "cfilt/gh.h"
 
 #include <stdio.h>
 #include <stdlib.h>
