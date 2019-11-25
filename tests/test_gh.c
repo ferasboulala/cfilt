@@ -1,9 +1,5 @@
 #include "cfilt/gh.h"
-
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+#include "common.h"
 
 #define N_STEPS 1000
 #define DT 0.1
@@ -15,10 +11,6 @@
 #define V_MAX 100.0
 #define X_NOISE 1.0
 #define V_NOISE 1.0
-
-#define RAND() ((double)rand() / (RAND_MAX - 1) - 0.5)
-#define SCRAND(scale) ((scale)*RAND())
-#define NOISE(scale) SCRAND((scale))
 
 /**
  * This test emulates an entity moving in a straight line. Its sensors yield
