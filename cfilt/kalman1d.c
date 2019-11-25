@@ -13,5 +13,5 @@ cfilt_kalman1d_update(struct cfilt_gauss* x, struct cfilt_gauss x_pred, struct c
     const double residual = z.mean - x_pred.mean;
     const double kalman_gain = x_pred.var / (x_pred.var + z.var);
     x->mean = kalman_gain * residual + x_pred.mean;
-    x->var = x_pred.var * z.var / (x_pred.var + z.var);
+    x->var = (1 - kalman_gain) * x_pred.var;
 }
