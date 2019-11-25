@@ -1,9 +1,9 @@
 #include "cfilt/gh.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <math.h>
 
 #define N_STEPS 1000
 #define DT 0.1
@@ -24,7 +24,8 @@
  * This test emulates an entity moving in a straight line. Its sensors yield
  * position and velocity but we wish to track acceleration aswell.
  */
-int main(void)
+int
+main(void)
 {
     struct gh_filter filter;
     gh_alloc(&filter, 3);
@@ -70,8 +71,8 @@ int main(void)
         const double e_v = velocity - filter.x[1];
         const double e_a = acceleration - filter.x[2];
 
-        printf("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", position, velocity, acceleration, x_pred, v_pred, a_pred, z_x, z_v,
-               x, v, a, e_x, e_v, e_a);
+        printf("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", position, velocity, acceleration, x_pred, v_pred, a_pred,
+               z_x, z_v, x, v, a, e_x, e_v, e_a);
     }
 
     gh_free(&filter);

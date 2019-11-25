@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-void gh_alloc(struct gh_filter *filt, size_t dim)
+void
+gh_alloc(struct gh_filter* filt, size_t dim)
 {
     filt->dim = dim;
     filt->gh = malloc(dim * sizeof(double));
@@ -13,7 +14,8 @@ void gh_alloc(struct gh_filter *filt, size_t dim)
     filt->upd_ = calloc(dim, sizeof(char));
 }
 
-void gh_free(struct gh_filter *filt)
+void
+gh_free(struct gh_filter* filt)
 {
     free(filt->gh);
     free(filt->x);
@@ -23,13 +25,15 @@ void gh_free(struct gh_filter *filt)
     memset(filt, 0, sizeof(struct gh_filter));
 }
 
-void gh_write(struct gh_filter *filt, double val, size_t order)
+void
+gh_write(struct gh_filter* filt, double val, size_t order)
 {
     filt->z_[order] = val;
     filt->upd_[order] = 1;
 }
 
-void gh_predict(struct gh_filter *filt, double dt)
+void
+gh_predict(struct gh_filter* filt, double dt)
 {
     for (size_t i = 0; i < filt->dim - 1; ++i)
     {
@@ -46,7 +50,8 @@ void gh_predict(struct gh_filter *filt, double dt)
     filt->x_pred[filt->dim - 1] = filt->x[filt->dim - 1];
 }
 
-void gh_update(struct gh_filter *filt, double dt)
+void
+gh_update(struct gh_filter* filt, double dt)
 {
     filt->x[0] += filt->upd_[0] ? (filt->gh[0] * (filt->z_[0] - filt->x_pred[0])) : filt->x_pred[0];
     filt->upd_[0] = 0;
