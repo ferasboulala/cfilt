@@ -45,8 +45,8 @@ main(void)
         const double v_pred = filter.x_pred[1];
         const double a_pred = filter.x_pred[2];
 
-        const double z_x = position + NOISE(X_NOISE);
-        const double z_v = velocity + NOISE(V_NOISE);
+        const double z_x = position + UNOISE(X_NOISE);
+        const double z_v = velocity + UNOISE(V_NOISE);
         gh_write(&filter, z_x, 0);
         gh_write(&filter, z_v, 1);
 

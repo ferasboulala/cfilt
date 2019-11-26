@@ -22,3 +22,4 @@ macro(binary prog_name prog_src)
 endmacro()
 
 binary(test_gh tests/test_gh.c)
+binary(test_kalman1d tests/test_kalman1d.c)
