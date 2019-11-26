@@ -1,9 +1,12 @@
 # !/bin/bash
 
 cd ../cfilt
+pwd
 clang-format -i *.c *.h
 
 cd ../tests
-clang-format -i *.c *.h
+pwd
+clang-format -i *.c
 
 cd ../scripts
+pwd

@@ -1,5 +1,5 @@
-#ifndef GH_H
-#define GH_H
+#ifndef _GH_H
+#define _GH_H
 
 /**
  * A simple implementation of the gh filter (also known as the alpha beta filter).
@@ -32,6 +32,10 @@
 
 #include <sys/types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // gh filter object
 // Private fields have '_' as a suffix
 struct gh_filter
@@ -50,10 +54,11 @@ struct gh_filter
     char* upd_;
     // Data. It is private.
     double* z_;
+    void* ptr_;
 };
 
 // Initializes the internal variables of the gh filter structure.
-void gh_alloc(struct gh_filter* filt, size_t dim);
+int gh_alloc(struct gh_filter* filt, size_t dim);
 
 // Frees the ressources associated with the gh filter object.
 void gh_free(struct gh_filter* filt);
@@ -67,4 +72,8 @@ void gh_predict(struct gh_filter* filt, double dt);
 // Updates the value of the state variables according to the data.
 void gh_update(struct gh_filter* filt, double dt);
 
-#endif // GH_H
+#ifdef __cplusplus
+}
+#endif
+
+#endif // _GH_H

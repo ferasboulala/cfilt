@@ -16,7 +16,6 @@
  * This test emulates an entity moving in a straight line. Its sensors yield
  * position and velocity. Both state variables will be tracked independently.
  */
-
 int
 main(void)
 {

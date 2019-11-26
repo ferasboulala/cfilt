@@ -1,27 +1,33 @@
 #include "cfilt/gh.h"
 
+#include <gsl/gsl_errno.h>
+
 #include <stdlib.h>
 #include <string.h>
 
-void
+int
 gh_alloc(struct gh_filter* filt, size_t dim)
 {
     filt->dim = dim;
-    filt->gh = malloc(dim * sizeof(double));
-    filt->x = malloc(dim * sizeof(double));
-    filt->x_pred = malloc(dim * sizeof(double));
-    filt->z_ = malloc(dim * sizeof(double));
-    filt->upd_ = calloc(dim, sizeof(char));
+    filt->ptr_ = calloc(1, 4 * dim * sizeof(double) + dim * sizeof(char));
+    if (filt->ptr_ == NULL)
+    {
+        GSL_ERROR("failed to allocate space for gh filter", GSL_ENOMEM);
+    }
+
+    filt->gh = filt->ptr_;
+    filt->x = (void*)filt->gh + dim * sizeof(double);
+    filt->x_pred = (void*)filt->x + dim * sizeof(double);
+    filt->z_ = (void*)filt->x_pred + dim * sizeof(double);
+    filt->upd_ = (void*)filt->z_ + dim * sizeof(double);
+
+    return GSL_SUCCESS;
 }
 
 void
 gh_free(struct gh_filter* filt)
 {
-    free(filt->gh);
-    free(filt->x);
-    free(filt->x_pred);
-    free(filt->z_);
-    free(filt->upd_);
+    free(filt->ptr_);
     memset(filt, 0, sizeof(struct gh_filter));
 }
 

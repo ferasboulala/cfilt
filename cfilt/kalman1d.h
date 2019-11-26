@@ -1,7 +1,7 @@
 #ifndef KALMAN1D_H
 #define KALMAN1D_H
 
-#include "common.h"
+#include "cfilt/cfilt.h"
 
 /**
  * Simple implementation of a 1D Kalman Filter.
