@@ -17,8 +17,8 @@
  * along with cfilt. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef KALMAN1D_H
-#define KALMAN1D_H
+#ifndef KALMAN1D_H_
+#define KALMAN1D_H_
 
 #include "cfilt/cfilt.h"
 
@@ -39,4 +39,4 @@ void cfilt_kalman1d_update(struct cfilt_gauss* x, struct cfilt_gauss x_pred, str
 }
 #endif
 
-#endif // KALMAN1D_H
+#endif // KALMAN1D_H_

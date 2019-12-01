@@ -17,8 +17,8 @@
  * along with cfilt. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef KALMAN_H
-#define KALMAN_H
+#ifndef KALMAN_H_
+#define KALMAN_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,4 +31,4 @@ void cfilt_kalman_update(void);
 }
 #endif
 
-#endif // KALMAN_H
+#endif // KALMAN_H_

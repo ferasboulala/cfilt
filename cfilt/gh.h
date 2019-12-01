@@ -17,8 +17,8 @@
  * along with cfilt. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _GH_H
-#define _GH_H
+#ifndef GH_H_
+#define GH_H_
 
 /**
  * A simple implementation of the gh filter (also known as the alpha beta filter).
@@ -81,4 +81,4 @@ void gh_update(struct gh_filter* filt, double dt);
 }
 #endif
 
-#endif // _GH_H
+#endif // GH_H_
