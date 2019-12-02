@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU GEneral Public License
+ * You should have received a copy of the GNU General Public License
  * along with cfilt. If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -25,7 +25,7 @@
 #include <string.h>
 
 int
-gh_alloc(struct gh_filter* filt, size_t dim)
+gh_alloc(struct gh_filter* filt, const size_t dim)
 {
     filt->dim = dim;
     filt->ptr_ = calloc(1, 4 * dim * sizeof(double) + dim * sizeof(char));
@@ -51,14 +51,14 @@ gh_free(struct gh_filter* filt)
 }
 
 void
-gh_write(struct gh_filter* filt, double val, size_t order)
+gh_write(struct gh_filter* filt, double val, const size_t order)
 {
     filt->z_[order] = val;
     filt->upd_[order] = 1;
 }
 
 void
-gh_predict(struct gh_filter* filt, double dt)
+gh_predict(struct gh_filter* filt, const double dt)
 {
     for (size_t i = 0; i < filt->dim - 1; ++i)
     {
@@ -72,11 +72,12 @@ gh_predict(struct gh_filter* filt, double dt)
             denum *= (denum + 1);
         }
     }
+
     filt->x_pred[filt->dim - 1] = filt->x[filt->dim - 1];
 }
 
 void
-gh_update(struct gh_filter* filt, double dt)
+gh_update(struct gh_filter* filt, const double dt)
 {
     filt->x[0] += filt->upd_[0] ? (filt->gh[0] * (filt->z_[0] - filt->x_pred[0])) : filt->x_pred[0];
     filt->upd_[0] = 0;
@@ -84,6 +85,7 @@ gh_update(struct gh_filter* filt, double dt)
     {
         filt->x[i] = filt->x_pred[i];
         double residual = 0.0;
+
         if (filt->upd_[i])
         {
             residual = filt->z_[i] - filt->x_pred[i];

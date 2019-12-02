@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU GEneral Public License
+ * You should have received a copy of the GNU General Public License
  * along with cfilt. If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -67,15 +67,15 @@ struct gh_filter
     void* ptr_;
 };
 
-int gh_alloc(struct gh_filter* filt, size_t dim);
+int gh_alloc(struct gh_filter* filt, const size_t dim);
 
 void gh_free(struct gh_filter* filt);
 
-void gh_write(struct gh_filter* filt, double val, size_t ord);
+void gh_write(struct gh_filter* filt, const double val, const size_t ord);
 
-void gh_predict(struct gh_filter* filt, double dt);
+void gh_predict(struct gh_filter* filt, const double dt);
 
-void gh_update(struct gh_filter* filt, double dt);
+void gh_update(struct gh_filter* filt, const double dt);
 
 #ifdef __cplusplus
 }
