@@ -20,10 +20,10 @@
 #ifndef _CFILT_H
 #define _CFILT_H
 
-struct cfilt_gauss
+typedef struct 
 {
     double mean;
     double var;
-};
+} cfilt_gauss;
 
 #endif // _CFILT_H

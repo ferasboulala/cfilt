@@ -55,7 +55,7 @@
 extern "C" {
 #endif
 
-struct gh_filter
+typedef struct 
 {
     double* gh;
     double* x;
@@ -65,17 +65,18 @@ struct gh_filter
     char* upd_;
     double* z_;
     void* ptr_;
-};
 
-int gh_alloc(struct gh_filter* filt, const size_t dim);
+} gh_filter;
 
-void gh_free(struct gh_filter* filt);
+int gh_alloc(gh_filter* filt, const size_t dim);
 
-void gh_write(struct gh_filter* filt, const double val, const size_t ord);
+void gh_free(gh_filter* filt);
 
-void gh_predict(struct gh_filter* filt, const double dt);
+void gh_write(gh_filter* filt, const double val, const size_t ord);
 
-void gh_update(struct gh_filter* filt, const double dt);
+void gh_predict(gh_filter* filt, const double dt);
+
+void gh_update(gh_filter* filt, const double dt);
 
 #ifdef __cplusplus
 }

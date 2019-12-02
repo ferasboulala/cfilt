@@ -45,7 +45,7 @@
 int
 main(void)
 {
-    struct gh_filter filter;
+    gh_filter filter;
     gh_alloc(&filter, 3);
 
     srand(time(NULL));

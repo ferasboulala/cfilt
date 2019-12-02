@@ -41,9 +41,9 @@ main(void)
     double real_position = X0;
     double real_velocity = V0;
 
-    struct cfilt_gauss position = {.mean = X0, .var = X_NOISE * X_NOISE };
-    struct cfilt_gauss velocity = {.mean = V0, .var = V_NOISE * V_NOISE };
-    struct cfilt_gauss acceleration = {.mean = 0, .var = V_NOISE * V_NOISE };
+    cfilt_gauss position = {.mean = X0, .var = X_NOISE * X_NOISE };
+    cfilt_gauss velocity = {.mean = V0, .var = V_NOISE * V_NOISE };
+    cfilt_gauss acceleration = {.mean = 0, .var = V_NOISE * V_NOISE };
 
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_taus);
     gsl_rng_set(rng, time(NULL));
@@ -52,11 +52,11 @@ main(void)
 
     for (int i = 0; i < N_STEPS; ++i)
     {
-        struct cfilt_gauss position_pred;
-        struct cfilt_gauss velocity_pred;
+        cfilt_gauss position_pred;
+        cfilt_gauss velocity_pred;
 
-        const struct cfilt_gauss dx = {.mean = velocity.mean * DT, .var = velocity.var * DT * DT };
-        const struct cfilt_gauss dv = {.mean = acceleration.mean, .var = acceleration.var * DT * DT };
+        const cfilt_gauss dx = {.mean = velocity.mean * DT, .var = velocity.var * DT * DT };
+        const cfilt_gauss dv = {.mean = acceleration.mean, .var = acceleration.var * DT * DT };
 
         cfilt_kalman1d_predict(&position_pred, position, dx);
         cfilt_kalman1d_predict(&velocity_pred, velocity, dv);
@@ -67,8 +67,8 @@ main(void)
         const double x_noise = gsl_ran_gaussian(rng, X_NOISE);
         const double v_noise = gsl_ran_gaussian(rng, V_NOISE);
 
-        struct cfilt_gauss position_z = {.mean = real_position + x_noise, X_NOISE * X_NOISE };
-        struct cfilt_gauss velocity_z = {.mean = real_velocity + v_noise, V_NOISE * V_NOISE };
+        cfilt_gauss position_z = {.mean = real_position + x_noise, X_NOISE * X_NOISE };
+        cfilt_gauss velocity_z = {.mean = real_velocity + v_noise, V_NOISE * V_NOISE };
 
         cfilt_kalman1d_update(&position, position_pred, position_z);
         cfilt_kalman1d_update(&velocity, velocity_pred, velocity_z);

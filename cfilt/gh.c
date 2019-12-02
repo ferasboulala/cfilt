@@ -25,7 +25,7 @@
 #include <string.h>
 
 int
-gh_alloc(struct gh_filter* filt, const size_t dim)
+gh_alloc(gh_filter* filt, const size_t dim)
 {
     filt->dim = dim;
     filt->ptr_ = calloc(1, 4 * dim * sizeof(double) + dim * sizeof(char));
@@ -44,21 +44,21 @@ gh_alloc(struct gh_filter* filt, const size_t dim)
 }
 
 void
-gh_free(struct gh_filter* filt)
+gh_free(gh_filter* filt)
 {
     free(filt->ptr_);
-    memset(filt, 0, sizeof(struct gh_filter));
+    memset(filt, 0, sizeof(gh_filter));
 }
 
 void
-gh_write(struct gh_filter* filt, double val, const size_t order)
+gh_write(gh_filter* filt, double val, const size_t order)
 {
     filt->z_[order] = val;
     filt->upd_[order] = 1;
 }
 
 void
-gh_predict(struct gh_filter* filt, const double dt)
+gh_predict(gh_filter* filt, const double dt)
 {
     for (size_t i = 0; i < filt->dim - 1; ++i)
     {
@@ -77,7 +77,7 @@ gh_predict(struct gh_filter* filt, const double dt)
 }
 
 void
-gh_update(struct gh_filter* filt, const double dt)
+gh_update(gh_filter* filt, const double dt)
 {
     filt->x[0] += filt->upd_[0] ? (filt->gh[0] * (filt->z_[0] - filt->x_pred[0])) : filt->x_pred[0];
     filt->upd_[0] = 0;

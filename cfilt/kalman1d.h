@@ -31,9 +31,9 @@
 extern "C" {
 #endif
 
-void cfilt_kalman1d_predict(struct cfilt_gauss* x_pred, struct cfilt_gauss x, struct cfilt_gauss dx);
+void cfilt_kalman1d_predict(cfilt_gauss* x_pred, cfilt_gauss x, cfilt_gauss dx);
 
-void cfilt_kalman1d_update(struct cfilt_gauss* x, struct cfilt_gauss x_pred, struct cfilt_gauss z);
+void cfilt_kalman1d_update(cfilt_gauss* x, cfilt_gauss x_pred, cfilt_gauss z);
 
 #ifdef __cplusplus
 }
