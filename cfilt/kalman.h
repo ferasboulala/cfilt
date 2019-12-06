@@ -20,7 +20,8 @@
 #ifndef KALMAN_H_
 #define KALMAN_H_
 
-#include <gsl/gsl_blas.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
 
 #include <sys/types.h>
 
@@ -37,6 +38,7 @@ extern "C" {
  * B (n x m)    : Control matrix
  * Q (n x n)    : Process covariance matrix (noise)
  * P (n x n)    : State covariance matrix
+ * P_(n x n)    : State estimate covariance matrix
  *
  * H (k x n)    : Measurement matrix
  * R (k x k)    : Measurement covariance matrix (noise)
@@ -44,6 +46,7 @@ extern "C" {
  * x (n x 1)    : State vector
  * x_(n x 1)    : State estimate vector
  * z (k x 1)    : Measurement vector
+ * u (m x 1)    : Control input vector
  */
 
 
@@ -52,23 +55,29 @@ typedef struct
     gsl_vector *x;
     gsl_vector *x_;
     gsl_vector *z;
+    gsl_vector *u;
 
     gsl_matrix *F;
     gsl_matrix *B;
     gsl_matrix *Q;
     gsl_matrix *P;
+    gsl_matrix *P_;
     gsl_matrix *H;
     gsl_matrix *R;
 
+    // Intermediary results
+    gsl_matrix *_FP;
+    gsl_matrix *_P_H_T;
+
 } cfilt_kalman_filter;
 
-int cfilt_kalman_alloc(cfilt_kalman_filter *filt, const size_t dim);
+int cfilt_kalman_alloc(cfilt_kalman_filter *filt, const size_t n, const size_t m, const size_t k);
 
 void cfilt_kalman_free(cfilt_kalman_filter *filt);
 
-void cfilt_kalman_predict(cfilt_kalman_filter *filt);
+int cfilt_kalman_predict(cfilt_kalman_filter *filt);
 
-void cfilt_kalman_update(cfilt_kalman_filter *filt);
+int cfilt_kalman_update(cfilt_kalman_filter *filt);
 
 #ifdef __cplusplus
 }
