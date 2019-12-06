@@ -39,6 +39,7 @@ extern "C" {
  * Q (n x n)    : Process covariance matrix (noise)
  * P (n x n)    : State covariance matrix
  * P_(n x n)    : State estimate covariance matrix
+ * K (n x k)    : Kalman gain matrix
  *
  * H (k x n)    : Measurement matrix
  * R (k x k)    : Measurement covariance matrix (noise)
@@ -47,6 +48,7 @@ extern "C" {
  * x_(n x 1)    : State estimate vector
  * z (k x 1)    : Measurement vector
  * u (m x 1)    : Control input vector
+ * y (k x 1)    : Residual vector
  */
 
 
@@ -56,6 +58,7 @@ typedef struct
     gsl_vector *x_;
     gsl_vector *z;
     gsl_vector *u;
+    gsl_vector *y;
 
     gsl_matrix *F;
     gsl_matrix *B;
@@ -64,10 +67,14 @@ typedef struct
     gsl_matrix *P_;
     gsl_matrix *H;
     gsl_matrix *R;
+    gsl_matrix *K;
 
     // Intermediary results
     gsl_matrix *_FP;
     gsl_matrix *_P_H_T;
+    gsl_matrix *_P_H_T_R;
+    gsl_permutation *_perm;
+    gsl_matrix *_identity;
 
 } cfilt_kalman_filter;
 
