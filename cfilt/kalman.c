@@ -41,6 +41,7 @@ cfilt_kalman_alloc(cfilt_kalman_filter* filt, const size_t n, const size_t m, co
     memset(filt, 0, sizeof(cfilt_kalman_filter));
 
     filt->F = gsl_matrix_calloc(n, n);
+    filt->P_ = gsl_matrix_calloc(n, n);
     filt->B = gsl_matrix_calloc(n, m);
     filt->Q = gsl_matrix_calloc(n, n);
     filt->P = gsl_matrix_calloc(n, n);
@@ -55,14 +56,14 @@ cfilt_kalman_alloc(cfilt_kalman_filter* filt, const size_t n, const size_t m, co
     filt->y = gsl_vector_calloc(k);
 
     filt->_FP = gsl_matrix_alloc(n, n);
-    filt->_P_H_T = gsl_matrix_alloc(n, k);
-    filt->_P_H_T_R = gsl_matrix_alloc(n, k);
+    filt->_PH_T = gsl_matrix_alloc(n, k);
+    filt->_PH_T_R = gsl_matrix_alloc(n, k);
     filt->_inv = gsl_matrix_alloc(n, k);
     filt->_perm = gsl_permutation_alloc(n);
     filt->_I = gsl_matrix_alloc(n, n);
 
     if (!filt->F || !filt->B || !filt->Q || !filt->P || !filt->H || !filt->R || !filt->x || !filt->x_ || !filt->z ||
-        !filt->u || !filt->y || !filt->_FP || !filt->_P_H_T || !filt->_I || !filt->_perm || !filt->_inv)
+        !filt->u || !filt->y || !filt->_FP || !filt->_PH_T || !filt->_I || !filt->_perm || !filt->_inv)
     {
         GSL_ERROR("failed to allocate space for kalman filter matrices", GSL_ENOMEM);
     }
@@ -88,8 +89,8 @@ cfilt_kalman_free(cfilt_kalman_filter* filt)
     FREE_IF_NO_NULLV(filt->y);
 
     FREE_IF_NO_NULLM(filt->_FP);
-    FREE_IF_NO_NULLM(filt->_P_H_T);
-    FREE_IF_NO_NULLM(filt->_P_H_T_R);
+    FREE_IF_NO_NULLM(filt->_PH_T);
+    FREE_IF_NO_NULLM(filt->_PH_T_R);
     FREE_IF_NO_NULLM(filt->_inv);
     FREE_IF_NO_NULLM(filt->_I);
 
@@ -119,14 +120,14 @@ cfilt_kalman_predict(cfilt_kalman_filter* filt)
         GSL_ERROR("failed to compute FP + [0] => _FP", GSL_EFAILED);
     }
 
-    if (gsl_blas_dgemm(CblasNoTrans, CblasTrans, 1.0, filt->_FP, filt->F, 1.0, filt->Q))
+    if (gsl_blas_dgemm(CblasNoTrans, CblasTrans, 1.0, filt->_FP, filt->F, 0.0, filt->P_))
     {
-        GSL_ERROR("failed to compute _FPF^T + Q => Q", GSL_EFAILED);
+        GSL_ERROR("failed to compute _FPF^T + [0] => P_", GSL_EFAILED);
     }
 
-    if (gsl_matrix_memcpy(filt->P_, filt->Q))
+    if (gsl_matrix_add(filt->P_, filt->Q))
     {
-        GSL_ERROR("failed to copy Q into P", GSL_EFAILED);
+        GSL_ERROR("failed to add Q into P_", GSL_EFAILED);
     }
 
     return GSL_SUCCESS;
@@ -136,41 +137,41 @@ int
 cfilt_kalman_update(cfilt_kalman_filter* filt)
 {
     // K = P_H^T(HP_H^T + R)^-1
-    // _P_H_T_R is used to avoid changing R
-    if (gsl_blas_dgemm(CblasNoTrans, CblasTrans, 1.0, filt->P_, filt->H, 0.0, filt->_P_H_T))
+    // _PH_T_R is used to avoid changing R
+    if (gsl_blas_dgemm(CblasNoTrans, CblasTrans, 1.0, filt->P_, filt->H, 0.0, filt->_PH_T))
     {
-        GSL_ERROR("failed to compute P_H^T + [0] => _P_H_T", GSL_EFAILED);
+        GSL_ERROR("failed to compute P_H^T + [0] => _PH_T", GSL_EFAILED);
     }
 
-    if (gsl_matrix_memcpy(filt->_P_H_T_R, filt->R))
+    if (gsl_matrix_memcpy(filt->_PH_T_R, filt->R))
     {
-        GSL_ERROR("failed to copy R into _P_H_T_R", GSL_EFAILED);
+        GSL_ERROR("failed to copy R into _PH_T_R", GSL_EFAILED);
     }
 
-    if (gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, filt->H, filt->_P_H_T, 1.0, filt->_P_H_T_R))
+    if (gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, filt->H, filt->_PH_T, 1.0, filt->_PH_T_R))
     {
-        GSL_ERROR("failed to compute H _P_H_T + _P_H_T_R => _P_H_T_R", GSL_EFAILED);
+        GSL_ERROR("failed to compute H _PH_T + _PH_T_R => _PH_T_R", GSL_EFAILED);
     }
 
     int signum;
-    if (gsl_linalg_LU_decomp(filt->_P_H_T_R, filt->_perm, &signum))
+    if (gsl_linalg_LU_decomp(filt->_PH_T_R, filt->_perm, &signum))
     {
-        GSL_ERROR("failed to compute the LU decomposition of _P_H_T_R", GSL_EFAILED);
+        GSL_ERROR("failed to compute the LU decomposition of _PH_T_R", GSL_EFAILED);
     }
 
-    if (gsl_linalg_LU_invert(filt->_P_H_T_R, filt->_perm, filt->_inv))
+    if (gsl_linalg_LU_invert(filt->_PH_T_R, filt->_perm, filt->_inv))
     {
         GSL_ERROR("failed to compute the inverse of R", GSL_EFAILED);
     }
 
-    if (gsl_matrix_memcpy(filt->_P_H_T_R, filt->_inv))
+    if (gsl_matrix_memcpy(filt->_PH_T_R, filt->_inv))
     {
-        GSL_ERROR("failed to copy inv into _P_H_T_R", GSL_EFAILED);
+        GSL_ERROR("failed to copy inv into _PH_T_R", GSL_EFAILED);
     }
 
-    if (gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, filt->_P_H_T, filt->_P_H_T_R, 0.0, filt->K))
+    if (gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, filt->_PH_T, filt->_PH_T_R, 0.0, filt->K))
     {
-        GSL_ERROR("failed to compute P_H^T _P_H_T_R", GSL_EFAILED);
+        GSL_ERROR("failed to compute P_H^T _PH_T_R", GSL_EFAILED);
     }
 
     // y = z - Hx_

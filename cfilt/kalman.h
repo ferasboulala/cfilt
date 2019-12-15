@@ -71,8 +71,8 @@ typedef struct
 
     // Intermediary results
     gsl_matrix* _FP;
-    gsl_matrix* _P_H_T;
-    gsl_matrix* _P_H_T_R;
+    gsl_matrix* _PH_T;
+    gsl_matrix* _PH_T_R;
     gsl_matrix* _inv;
     gsl_permutation* _perm;
     gsl_matrix* _I;
