@@ -26,11 +26,16 @@
 
 #define N_STEPS 1000
 #define DT 0.1
+
 #define V_X 1.0
 #define V_Y 2.0
-#define V_X_NOISE 0.1 * V_X
-#define V_Y_NOISE 0.1 * V_Y
-#define Q_VAR 0.1
+#define X_NOISE 10.0
+#define Y_NOISE 10.0
+#define V_X_NOISE 10.0
+#define V_Y_NOISE 10.0
+#define A_X 1.0
+#define A_Y 1.0
+#define Q_VAR 10.0
 
 /**
  * This test emulates an entity moving in a straight line, in 2D. Its sensors yield
@@ -39,53 +44,57 @@
 int
 main(void)
 {
+    // Setting off program abort to know where it failed
+    // gsl_set_error_handler_off();
+
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_taus);
     gsl_rng_set(rng, time(NULL));
 
     cfilt_kalman_filter filt;
-    if (cfilt_kalman_alloc(&filt, 4, 1, 2))
+    if (cfilt_kalman_alloc(&filt, 4, 4, 2))
     {
         fprintf(stderr, "Could not allocate kalman filter memory\n");
         goto cleanup;
     }
 
     // Setting up the state transition matrix F
-    // [1 0 0 0
-    //  0 1 0 0
-    //  0 0 1 0
-    //  0 0 0 1]
     gsl_matrix_set_identity(filt.F);
 
-    // Setting up the control matrix B
-    // [0
-    //  V_X
-    //  0
-    //  V_Y]
-    gsl_matrix_set_zero(filt.B);
-    gsl_matrix_set(filt.B, 1, 0, V_X);
-    gsl_matrix_set(filt.B, 3, 0, V_Y);
+    // Setting up the control matrix B (changes over time)
+    // [0 0 0 0
+    //  0 1 0 0
+    //  0 0 0 0
+    //  0 0 0 1]
+    gsl_matrix_set_identity(filt.B);
+    gsl_matrix_set(filt.B, 0, 0, 0);
+    gsl_matrix_set(filt.B, 2, 2, 0);
 
     // Setting up the control input vector u
-    // [dt]
+    // [dt
+    //  0
+    //  dt
+    //  0]
+    gsl_vector_set_zero(filt.u);
     gsl_vector_set(filt.u, 0, DT);
+    gsl_vector_set(filt.u, 2, DT);
 
     // Setting up the process covariance matrix Q
     gsl_matrix_set_identity(filt.Q);
     gsl_matrix_scale(filt.Q, Q_VAR);
 
     // Setting up the measurement matrix H
-    // [0 1 0 0
-    //  0 0 0 1]
+    // [1 0 0 0
+    //  0 0 1 0]
     gsl_matrix_set_zero(filt.H);
-    gsl_matrix_set(filt.H, 0, 1, 1);
-    gsl_matrix_set(filt.H, 1, 3, 1);
+    gsl_matrix_set(filt.H, 0, 0, 1);
+    gsl_matrix_set(filt.H, 1, 2, 1);
 
     // Setting up the measurement covariance matrix R
-    // [V_X_NOISE 0
-    //     0  V_Y_NOISE]
+    // [X_NOISE 0
+    //     0  Y_NOISE]
     gsl_matrix_set_zero(filt.R);
-    gsl_matrix_set(filt.R, 0, 0, V_X_NOISE);
-    gsl_matrix_set(filt.R, 1, 1, V_Y_NOISE);
+    gsl_matrix_set(filt.R, 0, 0, X_NOISE);
+    gsl_matrix_set(filt.R, 1, 1, Y_NOISE);
 
     // Initializing the state vector x
     // [0 V_X 0 V_Y]^T
@@ -95,9 +104,14 @@ main(void)
 
     // Initializing the covariance matrix P
     gsl_matrix_set_identity(filt.P);
-    gsl_matrix_scale(filt.P, 0.5);
+    gsl_matrix_scale(filt.P, 10.0);
 
-    printf("x_,dx_,y_,dy_,P_[0,0].P_[0,1],P_[1,0],P_[1,1]\n");
+    printf("x_,dx_,y_,dy_,x,dx,y,dy,x_real,dx_real,y_real,dy_real\n");
+
+    double x = 0;
+    double y = 0;
+    double v_x = V_X;
+    double v_y = V_Y;
 
     for (int i = 0; i < N_STEPS; ++i)
     {
@@ -109,12 +123,34 @@ main(void)
 
         printf("%f,%f,%f,%f,", gsl_vector_get(filt.x_, 0), gsl_vector_get(filt.x_, 1), gsl_vector_get(filt.x_, 2),
                gsl_vector_get(filt.x_, 3));
-        printf("%f,%f,%f,%f\n", gsl_matrix_get(filt.P_, 0, 0), gsl_matrix_get(filt.P_, 0, 1),
-               gsl_matrix_get(filt.P_, 1, 0), gsl_matrix_get(filt.P_, 1, 1));
 
-        // Because we are only predicting, x_ = x and P_ = P
-        gsl_vector_memcpy(filt.x, filt.x_);
-        gsl_matrix_memcpy(filt.P, filt.P_);
+        const double x_noise = gsl_ran_gaussian(rng, X_NOISE);
+        const double y_noise = gsl_ran_gaussian(rng, Y_NOISE);
+        const double v_x_noise = gsl_ran_gaussian(rng, V_X_NOISE);
+        const double v_y_noise = gsl_ran_gaussian(rng, V_Y_NOISE);
+
+        x += DT * v_x;
+        y += DT * v_y;
+        v_x += DT * A_X;
+        v_y += DT * A_Y;
+
+        gsl_vector_set(filt.z, 0, x + x_noise);
+        gsl_vector_set(filt.z, 1, y + y_noise);
+        gsl_matrix_set(filt.B, 0, 0, v_x + v_x_noise);
+        gsl_matrix_set(filt.B, 2, 2, v_y + v_y_noise);
+        gsl_vector_set(filt.u, 1, v_x + v_x_noise);
+        gsl_vector_set(filt.u, 3, v_y + v_y_noise);
+
+        if (cfilt_kalman_update(&filt))
+        {
+            fprintf(stderr, "An error occured with the update step\n");
+            break;
+        }
+
+        printf("%f,%f,%f,%f,", gsl_vector_get(filt.x, 0), gsl_vector_get(filt.x, 1), gsl_vector_get(filt.x, 2),
+               gsl_vector_get(filt.x, 3));
+
+        printf("%f,%f,%f,%f\n", x, y, v_x, v_y);
     }
 
 cleanup:

@@ -57,9 +57,9 @@ cfilt_kalman_alloc(cfilt_kalman_filter* filt, const size_t n, const size_t m, co
 
     filt->_FP = gsl_matrix_alloc(n, n);
     filt->_PH_T = gsl_matrix_alloc(n, k);
-    filt->_PH_T_R = gsl_matrix_alloc(n, k);
-    filt->_inv = gsl_matrix_alloc(n, k);
-    filt->_perm = gsl_permutation_alloc(n);
+    filt->_PH_T_R = gsl_matrix_alloc(k, k);
+    filt->_inv = gsl_matrix_alloc(k, k);
+    filt->_perm = gsl_permutation_alloc(k);
     filt->_I = gsl_matrix_alloc(n, n);
 
     if (!filt->F || !filt->B || !filt->Q || !filt->P || !filt->H || !filt->R || !filt->x || !filt->x_ || !filt->z ||
@@ -133,6 +133,7 @@ cfilt_kalman_predict(cfilt_kalman_filter* filt)
     return GSL_SUCCESS;
 }
 
+#include <stdio.h>
 int
 cfilt_kalman_update(cfilt_kalman_filter* filt)
 {
@@ -153,6 +154,7 @@ cfilt_kalman_update(cfilt_kalman_filter* filt)
         GSL_ERROR("failed to compute H _PH_T + _PH_T_R => _PH_T_R", GSL_EFAILED);
     }
 
+    // TODO : Make the matrix inversion a function if it is reused somewhere else
     int signum;
     if (gsl_linalg_LU_decomp(filt->_PH_T_R, filt->_perm, &signum))
     {
