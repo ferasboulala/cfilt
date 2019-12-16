@@ -27,16 +27,14 @@
 #define RAND() ((double)rand() / (RAND_MAX - 1) - 0.5)
 #define SCRAND(scale) ((scale)*RAND())
 #define UNOISE(scale) SCRAND((scale))
-#define N_STEPS 1000
+#define N_STEPS 100
 #define DT 0.1
 #define X0 0.0
 #define V0 0.0
-#define A0 1.0
-#define VEL 10.0
-#define ACC 0.0
-#define V_MAX 100.0
-#define X_NOISE 1.0
-#define V_NOISE 1.0
+#define A0 5.0
+#define V_MAX 200.0
+#define X_NOISE 500.0
+#define V_NOISE 10.0
 
 /**
  * This test emulates an entity moving in a straight line. Its sensors yield

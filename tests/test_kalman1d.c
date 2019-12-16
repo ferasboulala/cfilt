@@ -24,12 +24,13 @@
 #include <stdio.h>
 #include <time.h>
 
-#define N_STEPS 1000
+#define N_STEPS 100
 #define DT 0.1
 #define X0 0.0
-#define V0 10.0
-#define X_NOISE 2.0
-#define V_NOISE 2.0
+#define V0 5.0
+#define A0 0.0
+#define X_NOISE 1.0
+#define V_NOISE 0.1
 
 /**
  * This test emulates an entity moving in a straight line. Its sensors yield
@@ -43,12 +44,12 @@ main(void)
 
     cfilt_gauss position = {.mean = X0, .var = X_NOISE * X_NOISE };
     cfilt_gauss velocity = {.mean = V0, .var = V_NOISE * V_NOISE };
-    cfilt_gauss acceleration = {.mean = 0, .var = V_NOISE * V_NOISE };
+    cfilt_gauss acceleration = {.mean = A0, .var = V_NOISE * V_NOISE };
 
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_taus);
     gsl_rng_set(rng, time(NULL));
 
-    printf("x_pred,v_pred,x,v,x_real,v_real,e_x,e_v\n");
+    printf("x_pred,x_pred_var,v_pred,v_pred_var,x,x_var,v,v_var,x_real,v_real,z_x,z_x_var,z_v,z_v_var\n");
 
     for (int i = 0; i < N_STEPS; ++i)
     {
@@ -73,12 +74,9 @@ main(void)
         cfilt_kalman1d_update(&position, position_pred, position_z);
         cfilt_kalman1d_update(&velocity, velocity_pred, velocity_z);
 
-        const double position_error = real_position - position.mean;
-        const double velocity_error = real_velocity - velocity.mean;
-
-        printf("%f/%f,%f/%f,%f/%f,%f/%f,%f,%f,%f,%f\n", position_pred.mean, position_pred.var, velocity_pred.mean,
+        printf("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", position_pred.mean, position_pred.var, velocity_pred.mean,
                velocity_pred.var, position.mean, position.var, velocity.mean, velocity.var, real_position,
-               real_velocity, position_error, velocity_error);
+               real_velocity, position_z.mean, position_z.var, velocity_z.mean, velocity_z.var);
     }
 
     gsl_rng_free(rng);
