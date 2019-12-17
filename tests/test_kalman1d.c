@@ -22,23 +22,31 @@
 #include <gsl/gsl_randist.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
-#define N_STEPS 100
-#define DT 0.1
 #define X0 0.0
-#define V0 5.0
-#define A0 0.0
-#define X_NOISE 1.0
-#define V_NOISE 0.1
 
 /**
  * This test emulates an entity moving in a straight line. Its sensors yield
  * position and velocity. Both state variables will be tracked independently.
  */
 int
-main(void)
+main(int argc, char **argv)
 {
+    if (argc != 7)
+    {
+        fprintf(stderr, "Usage : test_kalman1d N_STEPS DT X_NOISE V_NOISE A0 V0\n");
+        return -1;
+    }
+
+    const int N_STEPS = atoi(argv[1]);
+    const double DT = atof(argv[2]);
+    const double X_NOISE = atof(argv[3]);
+    const double V_NOISE = atof(argv[4]);
+    const double A0 = atof(argv[5]);
+    const double V0 = atof(argv[6]);
+
     double real_position = X0;
     double real_velocity = V0;
 

@@ -1,9 +1,11 @@
-import matplotlib.pyplot as plt
-import pandas as pd
 import time
 import os
+import sys
 
-df = pd.read_csv('test_gh.csv')
+import matplotlib.pyplot as plt
+import pandas as pd
+
+df = pd.read_csv(sys.argv[1])
 
 plt, axes = plt.subplots(3, 1)
 x_plot, v_plot, a_plot = axes
@@ -31,4 +33,4 @@ a_plot.set_xlabel('step')
 a_plot.set_ylabel('acceleration')
 a_plot.set_title('Acceleration tracking')
 
-plt.show()
+plt.savefig(sys.argv[2])

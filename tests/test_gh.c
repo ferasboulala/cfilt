@@ -27,22 +27,32 @@
 #define RAND() ((double)rand() / (RAND_MAX - 1) - 0.5)
 #define SCRAND(scale) ((scale)*RAND())
 #define UNOISE(scale) SCRAND((scale))
-#define N_STEPS 100
-#define DT 0.1
+
 #define X0 0.0
-#define V0 0.0
-#define A0 5.0
-#define V_MAX 200.0
-#define X_NOISE 500.0
-#define V_NOISE 10.0
 
 /**
  * This test emulates an entity moving in a straight line. Its sensors yield
  * position and velocity but we wish to track acceleration aswell.
  */
 int
-main(void)
+main(int argc, char **argv)
 {
+    if (argc != 10)
+    {
+        fprintf(stderr, "Usage : test_gh N_STEPS DT X_NOISE V_NOISE A0 V0 GH0 GH1 GH2\n");
+        return -1;
+    }
+
+    const int N_STEPS = atoi(argv[1]);
+    const double DT = atof(argv[2]);
+    const double X_NOISE = atof(argv[3]);
+    const double V_NOISE = atof(argv[4]);
+    const double A0 = atof(argv[5]);
+    const double V0 = atof(argv[6]);
+    const double GH0 = atof(argv[7]);
+    const double GH1 = atof(argv[8]);
+    const double GH2 = atof(argv[9]);
+
     gh_filter filter;
     gh_alloc(&filter, 3);
 
@@ -56,9 +66,9 @@ main(void)
     filter.x[1] = velocity;
     filter.x[2] = acceleration;
 
-    filter.gh[0] = 0.25;
-    filter.gh[1] = 0.25;
-    filter.gh[2] = 0.5;
+    filter.gh[0] = GH0;
+    filter.gh[1] = GH1;
+    filter.gh[2] = GH2;
 
     printf("x,v,a,x_pred,v_pred,a_pred,z_x,z_v,x_,v_,a_,e_x,e_v,e_a\n");
 
@@ -71,6 +81,7 @@ main(void)
 
         const double z_x = position + UNOISE(X_NOISE);
         const double z_v = velocity + UNOISE(V_NOISE);
+
         gh_write(&filter, z_x, 0);
         gh_write(&filter, z_v, 1);
 
@@ -81,7 +92,6 @@ main(void)
 
         position += velocity * DT;
         velocity += acceleration * DT;
-        velocity = fmin(V_MAX, velocity);
 
         const double e_x = position - filter.x[0];
         const double e_v = velocity - filter.x[1];

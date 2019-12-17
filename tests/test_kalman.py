@@ -1,9 +1,11 @@
-import matplotlib.pyplot as plt
-import pandas as pd
 import time
 import os
+import sys
 
-df = pd.read_csv('test_kalman.csv')
+import matplotlib.pyplot as plt
+import pandas as pd
+
+df = pd.read_csv(sys.argv[1])
 
 plt, axes = plt.subplots(2, 2)
 x_plot, dx_plot, y_plot, dy_plot = axes[0][0], axes[0][1], axes[1][0], axes[1][1]
@@ -40,4 +42,4 @@ dy_plot.set_xlabel('step')
 dy_plot.set_ylabel('velocity (y)')
 dy_plot.set_title('Velocity (y) tracking')
 
-plt.show()
+plt.savefig(sys.argv[2])

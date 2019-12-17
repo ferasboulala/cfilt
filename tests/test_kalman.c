@@ -24,26 +24,31 @@
 #include <stdio.h>
 #include <time.h>
 
-#define N_STEPS 100
-#define DT 0.1
-
-#define V_X 1.0
-#define V_Y 1.0
-#define X_NOISE 1.0
-#define Y_NOISE 1.0
-#define V_X_NOISE 1.0
-#define V_Y_NOISE 1.0
-#define A_X 1.0
-#define A_Y 1.0
-#define Q_VAR 1.0
-
 /**
  * This test emulates an entity moving in a straight line, in 2D. Its sensors yield
  * position and velocity.
  */
 int
-main(void)
+main(int argc, char **argv)
 {
+    if (argc != 12)
+    {
+        fprintf(stderr, "Usage : test_kalman N_STEPS DT V_X V_Y X_NOISE Y_NOISE V_X_NOISE V_Y_NOISE A_X A_Y Q_VAR\n");
+        return -1;
+    }
+
+    const int N_STEPS = atoi(argv[1]);
+    const double DT = atof(argv[2]);
+    const double V_X = atof(argv[3]);
+    const double V_Y = atof(argv[4]);
+    const double X_NOISE = atof(argv[5]);
+    const double Y_NOISE = atof(argv[6]);
+    const double V_X_NOISE = atof(argv[7]);
+    const double V_Y_NOISE = atof(argv[8]);
+    const double A_X = atof(argv[9]);
+    const double A_Y = atof(argv[10]);
+    const double Q_VAR = atof(argv[11]);
+
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_taus);
     gsl_rng_set(rng, time(NULL));
 
