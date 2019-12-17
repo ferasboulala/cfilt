@@ -24,6 +24,9 @@
 #include <stdio.h>
 #include <time.h>
 
+#define X0 100
+#define Y0 50
+
 /**
  * This test emulates an entity moving in a straight line, in 2D. Its sensors yield
  * position and velocity.
@@ -31,9 +34,9 @@
 int
 main(int argc, char** argv)
 {
-    if (argc != 12)
+    if (argc != 10)
     {
-        fprintf(stderr, "Usage : test_kalman N_STEPS DT V_X V_Y X_NOISE Y_NOISE V_X_NOISE V_Y_NOISE A_X A_Y Q_VAR\n");
+        fprintf(stderr, "Usage : test_kalman N_STEPS DT V_X V_Y X_NOISE Y_NOISE A_X A_Y Q_VAR\n");
         return -1;
     }
 
@@ -43,11 +46,9 @@ main(int argc, char** argv)
     const double V_Y = atof(argv[4]);
     const double X_NOISE = atof(argv[5]);
     const double Y_NOISE = atof(argv[6]);
-    const double V_X_NOISE = atof(argv[7]);
-    const double V_Y_NOISE = atof(argv[8]);
-    const double A_X = atof(argv[9]);
-    const double A_Y = atof(argv[10]);
-    const double Q_VAR = atof(argv[11]);
+    const double A_X = atof(argv[7]);
+    const double A_Y = atof(argv[8]);
+    const double Q_VAR = atof(argv[9]);
 
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_taus);
     gsl_rng_set(rng, time(NULL));
@@ -78,9 +79,10 @@ main(int argc, char** argv)
     gsl_matrix_set(filt.B, 3, 1, 1);
 
     // Setting up the control input vector u (changes)
-    // [0
-    //  0]
-    gsl_vector_set_zero(filt.u);
+    // [V_X
+    //  V_Y]
+    gsl_vector_set(filt.u, 0, V_X);
+    gsl_vector_set(filt.u, 1, V_Y);
 
     // Setting up the process covariance matrix Q
     gsl_matrix_set_identity(filt.Q);
@@ -108,12 +110,12 @@ main(int argc, char** argv)
 
     // Initializing the covariance matrix P
     gsl_matrix_set_identity(filt.P);
-    gsl_matrix_scale(filt.P, 1.0);
+    gsl_matrix_scale(filt.P, 100);
 
     printf("x_,dx_,y_,dy_,x,dx,y,dy,x_real,dx_real,y_real,dy_real\n");
 
-    double x = 0;
-    double y = 0;
+    double x = X0;
+    double y = Y0;
     double v_x = V_X;
     double v_y = V_Y;
 
@@ -130,8 +132,6 @@ main(int argc, char** argv)
 
         const double x_noise = gsl_ran_gaussian(rng, X_NOISE);
         const double y_noise = gsl_ran_gaussian(rng, Y_NOISE);
-        const double v_x_noise = gsl_ran_gaussian(rng, V_X_NOISE);
-        const double v_y_noise = gsl_ran_gaussian(rng, V_Y_NOISE);
 
         x += DT * v_x;
         y += DT * v_y;
@@ -147,8 +147,8 @@ main(int argc, char** argv)
             break;
         }
 
-        gsl_vector_set(filt.u, 0, DT * A_X + v_x_noise);
-        gsl_vector_set(filt.u, 1, DT * A_Y + v_y_noise);
+        gsl_vector_set(filt.u, 0, DT * A_X);
+        gsl_vector_set(filt.u, 1, DT * A_Y);
 
         printf("%f,%f,%f,%f,", gsl_vector_get(filt.x, 0), gsl_vector_get(filt.x, 1), gsl_vector_get(filt.x, 2),
                gsl_vector_get(filt.x, 3));
