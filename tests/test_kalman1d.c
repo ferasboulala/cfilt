@@ -32,7 +32,7 @@
  * position and velocity. Both state variables will be tracked independently.
  */
 int
-main(int argc, char **argv)
+main(int argc, char** argv)
 {
     if (argc != 7)
     {
