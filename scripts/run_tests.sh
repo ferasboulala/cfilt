@@ -3,8 +3,9 @@
 CUR=$(pwd)
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-cd "$DIR"
-cd ..
+cd "$DIR"/../
+pwd
+./runbuild.sh
 
 N_STEPS=100
 DT=0.1
