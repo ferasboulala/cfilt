@@ -151,8 +151,8 @@ main(int argc, char** argv)
         gsl_vector_set(filt.u, 0, DT * A_X);
         gsl_vector_set(filt.u, 1, DT * A_Y);
 
-        printf("%f,%f,%f,%f,%f,%f,", gsl_vector_get(filt.x, 0), gsl_matrix_get(filt.P, 0, 0), gsl_vector_get(filt.x, 1), gsl_vector_get(filt.x, 2), gsl_matrix_get(filt.P, 2, 2),
-               gsl_vector_get(filt.x, 3));
+        printf("%f,%f,%f,%f,%f,%f,", gsl_vector_get(filt.x, 0), gsl_matrix_get(filt.P, 0, 0), gsl_vector_get(filt.x, 1),
+               gsl_vector_get(filt.x, 2), gsl_matrix_get(filt.P, 2, 2), gsl_vector_get(filt.x, 3));
 
         printf("%f,%f,%f,%f\n", x, v_x, y, v_y);
     }

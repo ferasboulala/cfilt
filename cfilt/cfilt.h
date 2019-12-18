@@ -20,10 +20,25 @@
 #ifndef _CFILT_H
 #define _CFILT_H
 
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct
 {
     double mean;
     double var;
 } cfilt_gauss;
+
+int cfilt_process_cov_discrete_white_noise(gsl_matrix* tau, const double sigma, gsl_matrix* Q);
+
+int cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov, double* res);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _CFILT_H
