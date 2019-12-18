@@ -70,21 +70,21 @@ function test_kalman1d() {
 function test_kalman() {
     echo -e "testing multidimensional kalman filter (tracks x and y positions. Velocities are tracked but unobserved)"
 
-    local V_X=100
-    local V_Y=100
-    local X_NOISE=5
-    local Y_NOISE=5
+    local V_X=10
+    local V_Y=10
+    local X_NOISE=1
+    local Y_NOISE=1
     local A_X=0
     local A_Y=0
-    local Q_VAR=10
+    local Q_VAR=1
 
     echo -e "testing with default parameters"
     bin/test_kalman "$N_STEPS" "$DT" "$V_X" "$V_Y" "$X_NOISE" "$Y_NOISE" "$A_X" "$A_Y" "$Q_VAR" > "tests/test_kalman.csv"
     python tests/test_kalman.py "tests/test_kalman.csv" "tests/test_kalman.png"
 
-    A_X=100
-    A_Y=20
-    Q_VAR=50
+    A_X=1
+    A_Y=2
+    Q_VAR=5
 
     echo -e "testing with non zero acceleration"
     bin/test_kalman "$N_STEPS" "$DT" "$V_X" "$V_Y" "$X_NOISE" "$Y_NOISE" "$A_X" "$A_Y" "$Q_VAR" > "tests/test_kalman_acc.csv"
@@ -92,9 +92,9 @@ function test_kalman() {
 
     A_X=0
     A_Y=0
-    Q_VAR=10
-    X_NOISE=75
-    Y_NOISE=20
+    Q_VAR=1
+    X_NOISE=5
+    Y_NOISE=10
 
     echo -e "testing with extra sensor noise"
     bin/test_kalman "$N_STEPS" "$DT" "$V_X" "$V_Y" "$X_NOISE" "$Y_NOISE" "$A_X" "$A_Y" "$Q_VAR" > "tests/test_kalman_sensor_noisy.csv"
