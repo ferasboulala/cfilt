@@ -25,8 +25,8 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_permutation.h>
 
-#include <string.h>
 #include <math.h>
+#include <string.h>
 
 #define FREE_IF_NOT_NULL(m)                                                                                            \
     if (m)                                                                                                             \
@@ -46,8 +46,8 @@ cfilt_process_cov_discrete_white_noise(gsl_matrix* tau, const double sigma, gsl_
 }
 
 static void
-cfilt_mahalanobis_free(gsl_matrix* x_copy, gsl_matrix* mu_copy, gsl_matrix* xmuq, gsl_matrix* cov_inv, gsl_matrix* mahalanobis,
-                       gsl_permutation* perm)
+cfilt_mahalanobis_free(gsl_matrix* x_copy, gsl_matrix* mu_copy, gsl_matrix* xmuq, gsl_matrix* cov_inv,
+                       gsl_matrix* mahalanobis, gsl_permutation* perm)
 {
     FREE_IF_NOT_NULL(x_copy);
     FREE_IF_NOT_NULL(mu_copy);
@@ -115,6 +115,29 @@ cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov, double* res)
     *res = sqrt(*(double*)mahalanobis->data);
 
     cfilt_mahalanobis_free(x_copy, mu_copy, xmuq, cov_inv, mahalanobis, perm);
+
+    return GSL_SUCCESS;
+}
+
+int
+cfilt_norm_estimated_error_squared(gsl_vector* x_, gsl_matrix* cov, double* res)
+{
+    gsl_vector* zero = gsl_vector_alloc(x_->size);
+    if (!zero)
+    {
+        GSL_ERROR("failed to allocate memory to compute the nees", GSL_ENOMEM);
+    }
+
+    gsl_vector_set_zero(zero);
+
+    if (cfilt_mahalanobis(x_, zero, cov, res))
+    {
+        GSL_ERROR("failed to compute the mahalanobis distance with mu=[0] for nees", GSL_EFAILED);
+    }
+
+    *res *= *res;
+
+    gsl_vector_free(zero);
 
     return GSL_SUCCESS;
 }

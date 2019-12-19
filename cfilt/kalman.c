@@ -28,10 +28,10 @@
 
 #include <string.h>
 
-#define FREE_IF_NOT_NULLV(v)                                                                                            \
+#define FREE_IF_NOT_NULLV(v)                                                                                           \
     if (v)                                                                                                             \
         gsl_vector_free(v);
-#define FREE_IF_NOT_NULLM(m)                                                                                            \
+#define FREE_IF_NOT_NULLM(m)                                                                                           \
     if (m)                                                                                                             \
         gsl_matrix_free(m);
 

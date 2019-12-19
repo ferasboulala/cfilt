@@ -30,14 +30,14 @@ int
 main(void)
 {
     // Testing the discrete white noise covariance matrix generator
-    
-    gsl_matrix *tau = gsl_matrix_alloc(2, 1);
+
+    gsl_matrix* tau = gsl_matrix_alloc(2, 1);
     gsl_matrix_set(tau, 0, 0, 1.0 / 2 * DT * DT);
     gsl_matrix_set(tau, 1, 0, DT);
 
     const double sigma = 5;
 
-    gsl_matrix *Q = gsl_matrix_alloc(2, 2);
+    gsl_matrix* Q = gsl_matrix_alloc(2, 2);
 
     if (cfilt_process_cov_discrete_white_noise(tau, sigma, Q))
     {
@@ -51,14 +51,14 @@ main(void)
         goto cleanup;
     }
 
-    gsl_vector *x = gsl_vector_alloc(2);
+    gsl_vector* x = gsl_vector_alloc(2);
     gsl_vector_set(x, 0, 1);
     gsl_vector_set(x, 1, 2);
 
-    gsl_vector *mu = gsl_vector_alloc(2);
+    gsl_vector* mu = gsl_vector_alloc(2);
     gsl_vector_set_zero(mu);
 
-    gsl_matrix *cov = gsl_matrix_alloc(2, 2);
+    gsl_matrix* cov = gsl_matrix_alloc(2, 2);
     gsl_matrix_set_identity(cov);
 
     double res;
