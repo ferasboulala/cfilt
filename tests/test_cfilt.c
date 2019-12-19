@@ -20,6 +20,7 @@
 #include "cfilt/cfilt.h"
 
 #include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
 
 #include <stdio.h>
 
@@ -47,11 +48,37 @@ main(void)
     if (gsl_matrix_fprintf(stderr, Q, "%f"))
     {
         fprintf(stderr, "Failed to print out the covariance matrix\n");
+        goto cleanup;
     }
+
+    gsl_vector *x = gsl_vector_alloc(2);
+    gsl_vector_set(x, 0, 1);
+    gsl_vector_set(x, 1, 2);
+
+    gsl_vector *mu = gsl_vector_alloc(2);
+    gsl_vector_set_zero(mu);
+
+    gsl_matrix *cov = gsl_matrix_alloc(2, 2);
+    gsl_matrix_set_identity(cov);
+
+    double res;
+
+    if (cfilt_mahalanobis(x, mu, cov, &res))
+    {
+        fprintf(stderr, "Failed to compute the mahalanobis distance\n");
+    }
+    else
+    {
+        fprintf(stderr, "mahalanobis distance: %f\n", res);
+    }
+
+    gsl_vector_free(x);
+    gsl_vector_free(mu);
+    gsl_matrix_free(cov);
 
 cleanup:
     gsl_matrix_free(tau);
     gsl_matrix_free(Q);
-    
+
     return 0;
 }

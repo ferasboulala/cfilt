@@ -26,6 +26,7 @@
 #include <gsl/gsl_permutation.h>
 
 #include <string.h>
+#include <math.h>
 
 #define FREE_IF_NOT_NULL(m)                                                                                            \
     if (m)                                                                                                             \
@@ -45,12 +46,13 @@ cfilt_process_cov_discrete_white_noise(gsl_matrix* tau, const double sigma, gsl_
 }
 
 static void
-cfilt_mahalanobis_free(gsl_matrix* x_copy, gsl_matrix* mu_copy, gsl_matrix* cov_inv, gsl_matrix* mahalanobis,
+cfilt_mahalanobis_free(gsl_matrix* x_copy, gsl_matrix* mu_copy, gsl_matrix* xmuq, gsl_matrix* cov_inv, gsl_matrix* mahalanobis,
                        gsl_permutation* perm)
 {
     FREE_IF_NOT_NULL(x_copy);
     FREE_IF_NOT_NULL(mu_copy);
     FREE_IF_NOT_NULL(cov_inv);
+    FREE_IF_NOT_NULL(xmuq);
     FREE_IF_NOT_NULL(mahalanobis);
 
     if (perm)
@@ -59,19 +61,21 @@ cfilt_mahalanobis_free(gsl_matrix* x_copy, gsl_matrix* mu_copy, gsl_matrix* cov_
     }
 }
 
+#include <stdio.h>
 int
 cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov, double* res)
 {
     const int N = x->size;
     gsl_matrix* x_copy = gsl_matrix_alloc(N, 1);
     gsl_matrix* mu_copy = gsl_matrix_alloc(N, 1);
+    gsl_matrix* xmuq = gsl_matrix_alloc(1, N);
     gsl_matrix* cov_inv = gsl_matrix_alloc(N, N);
     gsl_matrix* mahalanobis = gsl_matrix_alloc(1, 1);
     gsl_permutation* perm = gsl_permutation_alloc(N);
 
     if (!x_copy || !mu_copy || !cov_inv || !mahalanobis || !perm)
     {
-        cfilt_mahalanobis_free(x_copy, mu_copy, cov_inv, mahalanobis, perm);
+        cfilt_mahalanobis_free(x_copy, mu_copy, xmuq, cov_inv, mahalanobis, perm);
         GSL_ERROR("failed to allocate memory for mahalanobis computation", GSL_ENOMEM);
     }
 
@@ -97,20 +101,20 @@ cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov, double* res)
     }
 
     // (x - mu)Q^T^(-1)
-    if (gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, x_copy, cov_inv, 0, mu_copy))
+    if (gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, x_copy, cov_inv, 0, xmuq))
     {
-        GSL_ERROR("failed to compute (x - mu)^T Q^-1 => mu_copy", GSL_EFAILED);
+        GSL_ERROR("failed to compute (x - mu)^T Q^-1 => xmuq", GSL_EFAILED);
     }
 
     // (x - mu)Q^-1(x - mu)
-    if (gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, mu_copy, x_copy, 0.0, mahalanobis))
+    if (gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, xmuq, x_copy, 0.0, mahalanobis))
     {
         GSL_ERROR("failed to compute the final step to mahalanobis distance", GSL_EFAILED);
     }
 
-    *res = *(double*)mahalanobis->data;
+    *res = sqrt(*(double*)mahalanobis->data);
 
-    cfilt_mahalanobis_free(x_copy, mu_copy, cov_inv, mahalanobis, perm);
+    cfilt_mahalanobis_free(x_copy, mu_copy, xmuq, cov_inv, mahalanobis, perm);
 
     return GSL_SUCCESS;
 }
