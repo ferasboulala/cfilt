@@ -34,10 +34,12 @@
 int
 cfilt_process_cov_discrete_white_noise(gsl_matrix* tau, const double sigma, gsl_matrix* Q)
 {
-    if (gsl_blas_dgemm(CblasNoTrans, CblasTrans, 1.0, tau, tau, sigma, Q))
+    if (gsl_blas_dgemm(CblasNoTrans, CblasTrans, 1.0, tau, tau, 0, Q))
     {
         GSL_ERROR("failed to compute Tau Tau^T => Q", GSL_EFAILED);
     }
+
+    gsl_matrix_scale(Q, sigma);
 
     return GSL_SUCCESS;
 }
@@ -50,6 +52,7 @@ cfilt_mahalanobis_free(gsl_matrix* x_copy, gsl_matrix* mu_copy, gsl_matrix* cov_
     FREE_IF_NOT_NULL(mu_copy);
     FREE_IF_NOT_NULL(cov_inv);
     FREE_IF_NOT_NULL(mahalanobis);
+
     if (perm)
     {
         gsl_permutation_free(perm);
