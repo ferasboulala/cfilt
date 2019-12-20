@@ -36,9 +36,9 @@
         gsl_matrix_free(m);
 
 int
-cfilt_kalman_alloc(cfilt_kalman_filter* filt, const size_t n, const size_t m, const size_t k)
+cfilt_kalman_alloc(cfilt_kalman* filt, const size_t n, const size_t m, const size_t k)
 {
-    memset(filt, 0, sizeof(cfilt_kalman_filter));
+    memset(filt, 0, sizeof(cfilt_kalman));
 
     filt->F = gsl_matrix_calloc(n, n);
     filt->P_ = gsl_matrix_calloc(n, n);
@@ -72,7 +72,7 @@ cfilt_kalman_alloc(cfilt_kalman_filter* filt, const size_t n, const size_t m, co
 }
 
 void
-cfilt_kalman_free(cfilt_kalman_filter* filt)
+cfilt_kalman_free(cfilt_kalman* filt)
 {
     FREE_IF_NOT_NULLM(filt->F);
     FREE_IF_NOT_NULLM(filt->B);
@@ -101,7 +101,7 @@ cfilt_kalman_free(cfilt_kalman_filter* filt)
 }
 
 int
-cfilt_kalman_predict(cfilt_kalman_filter* filt)
+cfilt_kalman_predict(cfilt_kalman* filt)
 {
     // x_ = Fx + Bu
     if (gsl_blas_dgemv(CblasNoTrans, 1.0, filt->F, filt->x, 0.0, filt->x_))
@@ -135,7 +135,7 @@ cfilt_kalman_predict(cfilt_kalman_filter* filt)
 
 #include <stdio.h>
 int
-cfilt_kalman_update(cfilt_kalman_filter* filt)
+cfilt_kalman_update(cfilt_kalman* filt)
 {
     // K = P_H^T(HP_H^T + R)^-1
     // _PH_T_R is used to avoid changing R

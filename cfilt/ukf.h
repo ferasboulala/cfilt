@@ -17,13 +17,45 @@
  * along with cfilt. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef UKF_H
-#define UKF_H
+#ifndef UKF_H_
+#define UKF_H_
+
+#include "cfilt/sigma.h"
+
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
+
+#include <sys/types.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+typedef struct
+{
+    gsl_vector* x_;
+    gsl_vector* x;
+
+    gsl_matrix* P_;
+    gsl_matrix* P;
+    gsl_matrix* R;
+    gsl_matrix* K;
+
+    int (*F)(void*, void*);
+    int (*H)(void*, void*);
+
+    cfilt_sigma_generator* gen;
+
+} cfilt_ukf;
+
+int cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k, int (*F)(void*, void*),
+                    int (*H)(void*, void*), cfilt_sigma_generator* gen);
+
+void cfilt_ukf_free(cfilt_ukf* filt);
+
+int cfilt_ukf_predict(cfilt_ukf* filt);
+
+int cfilt_ukf_update(cfilt_ukf* filt);
 
 #ifdef __cplusplus
 }

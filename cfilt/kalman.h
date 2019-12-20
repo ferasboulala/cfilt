@@ -77,15 +77,15 @@ typedef struct
     gsl_permutation* _perm;
     gsl_matrix* _I;
 
-} cfilt_kalman_filter;
+} cfilt_kalman;
 
-int cfilt_kalman_alloc(cfilt_kalman_filter* filt, const size_t n, const size_t m, const size_t k);
+int cfilt_kalman_alloc(cfilt_kalman* filt, const size_t n, const size_t m, const size_t k);
 
-void cfilt_kalman_free(cfilt_kalman_filter* filt);
+void cfilt_kalman_free(cfilt_kalman* filt);
 
-int cfilt_kalman_predict(cfilt_kalman_filter* filt);
+int cfilt_kalman_predict(cfilt_kalman* filt);
 
-int cfilt_kalman_update(cfilt_kalman_filter* filt);
+int cfilt_kalman_update(cfilt_kalman* filt);
 
 #ifdef __cplusplus
 }

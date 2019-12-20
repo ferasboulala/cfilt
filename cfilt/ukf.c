@@ -18,3 +18,59 @@
  */
 
 #include "cfilt/ukf.h"
+#include "cfilt/common.h"
+
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
+
+#include <string.h>
+#include <sys/types.h>
+
+#define V_ALLOC_ASSERT_(p, n) V_ALLOC_ASSERT(p, n, cfilt_ukf_free, filt)
+#define M_ALLOC_ASSERT_(p, n, m) M_ALLOC_ASSERT(p, n, m, cfilt_ukf_free, filt)
+
+int
+cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k, int (*F)(void*, void*),
+                int (*H)(void*, void*), cfilt_sigma_generator* gen)
+{
+    memset(filt, 0, sizeof(cfilt_ukf));
+
+    V_ALLOC_ASSERT_(filt->x_, n);
+    V_ALLOC_ASSERT_(filt->x, n);
+
+    M_ALLOC_ASSERT_(filt->P_, n, n);
+    M_ALLOC_ASSERT_(filt->P, n, n);
+    M_ALLOC_ASSERT_(filt->R, k, k);
+    M_ALLOC_ASSERT_(filt->K, n, k);
+
+    filt->F = F;
+    filt->H = H;
+    filt->gen = gen;
+
+    return GSL_SUCCESS;
+}
+
+void
+cfilt_ukf_free(cfilt_ukf* filt)
+{
+    V_FREE_IF_NOT_NULL(filt->x_);
+    V_FREE_IF_NOT_NULL(filt->x);
+
+    M_FREE_IF_NOT_NULL(filt->P_);
+    M_FREE_IF_NOT_NULL(filt->P);
+    M_FREE_IF_NOT_NULL(filt->R);
+    M_FREE_IF_NOT_NULL(filt->K);
+}
+
+int
+cfilt_ukf_predict(cfilt_ukf* filt)
+{
+    return GSL_SUCCESS;
+}
+
+int
+cfilt_ukf_update(cfilt_ukf* filt)
+{
+    return GSL_SUCCESS;
+}

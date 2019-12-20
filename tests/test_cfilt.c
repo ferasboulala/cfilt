@@ -39,7 +39,7 @@ main(void)
 
     gsl_matrix* Q = gsl_matrix_alloc(2, 2);
 
-    if (cfilt_process_cov_discrete_white_noise(tau, sigma, Q))
+    if (cfilt_discrete_white_noise(tau, sigma, Q))
     {
         fprintf(stderr, "Failed to compute the covariance matrix\n");
         goto cleanup;

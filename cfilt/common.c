@@ -17,30 +17,9 @@
  * along with cfilt. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _CFILT_H
-#define _CFILT_H
+#include "cfilt/common.h"
 
+#include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
-#include <gsl/gsl_vector.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef struct
-{
-    double mean;
-    double var;
-} cfilt_gauss;
-
-int cfilt_discrete_white_noise(gsl_matrix* tau, const double sigma, gsl_matrix* Q);
-
-int cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov, double* res);
-
-int cfilt_norm_estimated_error_squared(gsl_vector* x_, gsl_matrix* cov, double* res);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // _CFILT_H
+int cfilt_matrix_invert(gsl_matrix* mat, ...);

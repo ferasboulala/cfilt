@@ -33,7 +33,7 @@
         gsl_matrix_free(m);
 
 int
-cfilt_process_cov_discrete_white_noise(gsl_matrix* tau, const double sigma, gsl_matrix* Q)
+cfilt_discrete_white_noise(gsl_matrix* tau, const double sigma, gsl_matrix* Q)
 {
     if (gsl_blas_dgemm(CblasNoTrans, CblasTrans, 1.0, tau, tau, 0, Q))
     {
@@ -61,7 +61,6 @@ cfilt_mahalanobis_free(gsl_matrix* x_copy, gsl_matrix* mu_copy, gsl_matrix* xmuq
     }
 }
 
-#include <stdio.h>
 int
 cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov, double* res)
 {

@@ -53,7 +53,7 @@ main(int argc, char** argv)
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_taus);
     gsl_rng_set(rng, time(NULL));
 
-    cfilt_kalman_filter filt;
+    cfilt_kalman filt;
     if (cfilt_kalman_alloc(&filt, 4, 2, 2))
     {
         fprintf(stderr, "Could not allocate kalman filter memory\n");

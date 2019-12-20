@@ -17,30 +17,41 @@
  * along with cfilt. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _CFILT_H
-#define _CFILT_H
+#ifndef CFILT_SIGMA_H_
+#define CFILT_SIGMA_H_
 
 #include <gsl/gsl_matrix.h>
-#include <gsl/gsl_vector.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+typedef enum { CFILT_VAN_DER_MERWE = 0 } cfilt_sigma_generator_type;
+
 typedef struct
 {
-    double mean;
-    double var;
-} cfilt_gauss;
+    cfilt_sigma_generator_type type;
+    gsl_matrix* points;
+} cfilt_sigma_generator_common_;
 
-int cfilt_discrete_white_noise(gsl_matrix* tau, const double sigma, gsl_matrix* Q);
+typedef cfilt_sigma_generator_common_ cfilt_sigma_generator;
 
-int cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov, double* res);
+typedef struct
+{
+    cfilt_sigma_generator_common_ common_;
+    double alpha;
+    double beta;
+    double kappa;
+} cfilt_sigma_generator_van_der_merwe;
 
-int cfilt_norm_estimated_error_squared(gsl_vector* x_, gsl_matrix* cov, double* res);
+int cfilt_sigma_alloc(cfilt_sigma_generator_type, cfilt_sigma_generator** gen);
+
+void cfilt_sigma_free(cfilt_sigma_generator* gen);
+
+int cfilt_sigma_generate(cfilt_sigma_generator* gen, gsl_matrix** points);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _CFILT_H
+#endif // CFILT_SIGMA_H_
