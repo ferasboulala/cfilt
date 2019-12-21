@@ -21,23 +21,33 @@
 #define GH_H_
 
 /**
- * A simple implementation of the gh filter (also known as the alpha beta filter).
- * It tracks the values of an arbitrary amount of state variables that are related as such:
+ * A simple implementation of the gh filter (also known as the alpha beta
+ * filter).
+ * It tracks the values of an arbitrary amount of state variables that are
+ * related as such:
  *      x_(i+1) = d(x_i)/dt
  *
- * There are assumptions made with this filters. First, when tracking an set of state variables,
- * all intermediary variables will be tracked. For example, if we wish to track position and
- * acceleration, velocity will be tracked too. This is enforced by requiring a dimension for
- * the filter (dim := difference between the highest and lowest order variables + 1).
+ * There are assumptions made with this filters. First, when tracking an set of
+ * state variables,
+ * all intermediary variables will be tracked. For example, if we wish to track
+ * position and
+ * acceleration, velocity will be tracked too. This is enforced by requiring a
+ * dimension for
+ * the filter (dim := difference between the highest and lowest order variables
+ * + 1).
  *
- * When predicting the value of a state variable, we use all the higher order variables to do so.
- * That is, x_pred_i = x_i + dt * x_(i+1) + dt^2 * x_(i+2) * 1/2 + ... + dt^(n-i-1) * x_n * 1/(n-i-1)!.
+ * When predicting the value of a state variable, we use all the higher order
+ * variables to do so.
+ * That is, x_pred_i = x_i + dt * x_(i+1) + dt^2 * x_(i+2) * 1/2 + ... +
+ * dt^(n-i-1) * x_n * 1/(n-i-1)!.
  * For x_n, it is assumed that the value is constant only during the prediction.
  *
- * When updating the value of a state variable, the value of the residual is computed as:
+ * When updating the value of a state variable, the value of the residual is
+ * computed as:
  *      1) The variable received data: Residual = x_pred_i - _zi
  *      2) If not:
- *          a) The immediate lower order variable received data: Residual = x_pred_i - (x_pred_(i-1) - _z(i - 1)) / dt
+ *          a) The immediate lower order variable received data: Residual =
+ * x_pred_i - (x_pred_(i-1) - _z(i - 1)) / dt
  *          b) If not: Residual = 0.
  * In all cases, the update equation is x_i = x_i - gh_i * residual
  *

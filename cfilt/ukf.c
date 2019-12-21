@@ -31,8 +31,9 @@
 #define M_ALLOC_ASSERT_(p, n, m) M_ALLOC_ASSERT(p, n, m, cfilt_ukf_free, filt)
 
 int
-cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k, int (*F)(void*, void*),
-                int (*H)(void*, void*), cfilt_sigma_generator* gen)
+cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k,
+                int (*F)(void*, void*), int (*H)(void*, void*),
+                cfilt_sigma_generator* gen)
 {
     memset(filt, 0, sizeof(cfilt_ukf));
 

@@ -39,7 +39,9 @@ main(int argc, char** argv)
 {
     if (argc != 10)
     {
-        fprintf(stderr, "Usage : test_gh N_STEPS DT X_NOISE V_NOISE A0 V0 GH0 GH1 GH2\n");
+        fprintf(
+          stderr,
+          "Usage : test_gh N_STEPS DT X_NOISE V_NOISE A0 V0 GH0 GH1 GH2\n");
         return -1;
     }
 
@@ -97,8 +99,9 @@ main(int argc, char** argv)
         const double e_v = velocity - filter.x[1];
         const double e_a = acceleration - filter.x[2];
 
-        printf("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", position, velocity, acceleration, x_pred, v_pred, a_pred,
-               z_x, z_v, x, v, a, e_x, e_v, e_a);
+        printf("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", position,
+               velocity, acceleration, x_pred, v_pred, a_pred, z_x, z_v, x, v,
+               a, e_x, e_v, e_a);
     }
 
     cfilt_gh_free(&filter);

@@ -1,4 +1,4 @@
 BasedOnStyle: Mozilla
 IndentWidth: 4
-ColumnLimit: 120
+ColumnLimit: 80
 BreakBeforeBraces: Allman

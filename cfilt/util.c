@@ -20,11 +20,12 @@
 #include "cfilt/util.h"
 
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_linalg.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_permutation.h>
-#include <gsl/gsl_linalg.h>
 
-int cfilt_matrix_invert(gsl_matrix* src, gsl_matrix* dst, gsl_permutation *perm)
+int
+cfilt_matrix_invert(gsl_matrix* src, gsl_matrix* dst, gsl_permutation* perm)
 {
     int signum;
     EXEC_ASSERT(gsl_linalg_LU_decomp, src, perm, &signum);

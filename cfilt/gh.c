@@ -79,7 +79,9 @@ cfilt_gh_predict(cfilt_gh_filter* filt, const double dt)
 void
 cfilt_gh_update(cfilt_gh_filter* filt, const double dt)
 {
-    filt->x[0] += filt->_upd[0] ? (filt->gh[0] * (filt->_z[0] - filt->x_pred[0])) : filt->x_pred[0];
+    filt->x[0] += filt->_upd[0]
+                    ? (filt->gh[0] * (filt->_z[0] - filt->x_pred[0]))
+                    : filt->x_pred[0];
     filt->_upd[0] = 0;
     for (size_t i = filt->dim - 1; i > 0; --i)
     {
@@ -93,7 +95,8 @@ cfilt_gh_update(cfilt_gh_filter* filt, const double dt)
         }
         else if (filt->_upd[i - 1])
         {
-            residual = (filt->_z[i - 1] - filt->x[i - 1]) / dt - filt->x_pred[i];
+            residual =
+              (filt->_z[i - 1] - filt->x[i - 1]) / dt - filt->x_pred[i];
         }
 
         filt->x[i] += filt->gh[i] * residual;

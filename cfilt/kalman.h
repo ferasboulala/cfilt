@@ -79,7 +79,8 @@ typedef struct
 
 } cfilt_kalman_filter;
 
-int cfilt_kalman_filter_alloc(cfilt_kalman_filter* filt, const size_t n, const size_t m, const size_t k);
+int cfilt_kalman_filter_alloc(cfilt_kalman_filter* filt, const size_t n,
+                              const size_t m, const size_t k);
 
 void cfilt_kalman_filter_free(cfilt_kalman_filter* filt);
 

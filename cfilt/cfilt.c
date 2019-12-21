@@ -39,7 +39,8 @@ cfilt_discrete_white_noise(gsl_matrix* tau, const double sigma, gsl_matrix* Q)
 }
 
 static void
-cfilt_mahalanobis_free(gsl_matrix* x_copy, gsl_matrix* mu_copy, gsl_matrix* xmuq, gsl_matrix* cov_inv,
+cfilt_mahalanobis_free(gsl_matrix* x_copy, gsl_matrix* mu_copy,
+                       gsl_matrix* xmuq, gsl_matrix* cov_inv,
                        gsl_matrix* mahalanobis, gsl_permutation* perm)
 {
     M_FREE_IF_NOT_NULL(x_copy);
@@ -67,7 +68,8 @@ cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov, double* res)
 
     if (!x_copy || !mu_copy || !cov_inv || !mahalanobis || !perm)
     {
-        cfilt_mahalanobis_free(x_copy, mu_copy, xmuq, cov_inv, mahalanobis, perm);
+        cfilt_mahalanobis_free(x_copy, mu_copy, xmuq, cov_inv, mahalanobis,
+                               perm);
 
         return GSL_ENOMEM;
     }
@@ -82,10 +84,12 @@ cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov, double* res)
     EXEC_ASSERT(cfilt_matrix_invert, cov, cov_inv, perm);
 
     // (x - mu)Q^T^(-1)
-    EXEC_ASSERT(gsl_blas_dgemm, CblasTrans, CblasNoTrans, 1.0, x_copy, cov_inv, 0, xmuq);
+    EXEC_ASSERT(gsl_blas_dgemm, CblasTrans, CblasNoTrans, 1.0, x_copy, cov_inv,
+                0, xmuq);
 
     // (x - mu)Q^-1(x - mu)
-    EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasNoTrans, 1.0, xmuq, x_copy, 0.0, mahalanobis);
+    EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasNoTrans, 1.0, xmuq, x_copy,
+                0.0, mahalanobis);
 
     *res = sqrt(*(double*)mahalanobis->data);
 

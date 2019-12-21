@@ -24,7 +24,8 @@
 
 /**
  * Simple implementation of a 1D Kalman Filter.
- * All gaussians are represented by the structure cfilt_gauss (a pair of mean and variance).
+ * All gaussians are represented by the structure cfilt_gauss (a pair of mean
+ * and variance).
  */
 
 #ifdef __cplusplus

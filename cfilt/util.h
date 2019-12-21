@@ -22,46 +22,47 @@
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
-#include <gsl/gsl_vector.h>
 #include <gsl/gsl_permutation.h>
+#include <gsl/gsl_vector.h>
 
-#define FREE_IF_NOT_NULL(p, func)                                                                                      \
-    if (p)                                                                                                             \
+#define FREE_IF_NOT_NULL(p, func)                                              \
+    if (p)                                                                     \
         func(p);
 #define V_FREE_IF_NOT_NULL(v) FREE_IF_NOT_NULL(v, gsl_vector_free)
 #define M_FREE_IF_NOT_NULL(m) FREE_IF_NOT_NULL(m, gsl_matrix_free)
 
-#define M_ALLOC_ASSERT(p, n, m, func, ...)                                                                             \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        p = gsl_matrix_alloc(n, m);                                                                                    \
-        if (p == NULL)                                                                                                 \
-        {                                                                                                              \
-            func(__VA_ARGS__);                                                                                         \
-            return GSL_ENOMEM;                                                                                         \
-        }                                                                                                              \
+#define M_ALLOC_ASSERT(p, n, m, func, ...)                                     \
+    do                                                                         \
+    {                                                                          \
+        p = gsl_matrix_alloc(n, m);                                            \
+        if (p == NULL)                                                         \
+        {                                                                      \
+            func(__VA_ARGS__);                                                 \
+            return GSL_ENOMEM;                                                 \
+        }                                                                      \
     } while (0);
 
-#define V_ALLOC_ASSERT(p, n, func, ...)                                                                                \
-    do                                                                                                                 \
-    {                                                                                                                  \
-        p = gsl_vector_alloc(n);                                                                                       \
-        if (p == NULL)                                                                                                 \
-        {                                                                                                              \
-            func(__VA_ARGS__);                                                                                         \
-            return GSL_ENOMEM;                                                                                         \
-        }                                                                                                              \
+#define V_ALLOC_ASSERT(p, n, func, ...)                                        \
+    do                                                                         \
+    {                                                                          \
+        p = gsl_vector_alloc(n);                                               \
+        if (p == NULL)                                                         \
+        {                                                                      \
+            func(__VA_ARGS__);                                                 \
+            return GSL_ENOMEM;                                                 \
+        }                                                                      \
     } while (0);
 
-#define EXEC_ASSERT(func, ...)\
-do\
-{\
-if (func(__VA_ARGS__) != GSL_SUCCESS)\
-{\
-    return GSL_EFAILED;\
-}\
-} while (0);
+#define EXEC_ASSERT(func, ...)                                                 \
+    do                                                                         \
+    {                                                                          \
+        if (func(__VA_ARGS__) != GSL_SUCCESS)                                  \
+        {                                                                      \
+            return GSL_EFAILED;                                                \
+        }                                                                      \
+    } while (0);
 
-int cfilt_matrix_invert(gsl_matrix* src, gsl_matrix* dst, gsl_permutation *perm);
+int cfilt_matrix_invert(gsl_matrix* src, gsl_matrix* dst,
+                        gsl_permutation* perm);
 
 #endif // CFILT_UTIL_H_

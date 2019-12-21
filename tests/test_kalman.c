@@ -28,7 +28,8 @@
 #define Y0 50
 
 /**
- * This test emulates an entity moving in a straight line, in 2D. Its sensors yield
+ * This test emulates an entity moving in a straight line, in 2D. Its sensors
+ * yield
  * position and velocity.
  */
 int
@@ -36,7 +37,8 @@ main(int argc, char** argv)
 {
     if (argc != 10)
     {
-        fprintf(stderr, "Usage : test_kalman N_STEPS DT V_X V_Y X_NOISE Y_NOISE A_X A_Y Q_VAR\n");
+        fprintf(stderr, "Usage : test_kalman N_STEPS DT V_X V_Y X_NOISE "
+                        "Y_NOISE A_X A_Y Q_VAR\n");
         return -1;
     }
 
@@ -113,7 +115,8 @@ main(int argc, char** argv)
     gsl_matrix_set(filt.P, 0, 0, X_NOISE);
     gsl_matrix_set(filt.P, 2, 2, Y_NOISE);
 
-    printf("x_,dx_,y_,dy_,x,x_var,dx,y,y_var,dy,x_real,dx_real,y_real,dy_real\n");
+    printf(
+      "x_,dx_,y_,dy_,x,x_var,dx,y,y_var,dy,x_real,dx_real,y_real,dy_real\n");
 
     double x = X0;
     double y = Y0;
@@ -128,7 +131,8 @@ main(int argc, char** argv)
             break;
         }
 
-        printf("%f,%f,%f,%f,", gsl_vector_get(filt.x_, 0), gsl_vector_get(filt.x_, 1), gsl_vector_get(filt.x_, 2),
+        printf("%f,%f,%f,%f,", gsl_vector_get(filt.x_, 0),
+               gsl_vector_get(filt.x_, 1), gsl_vector_get(filt.x_, 2),
                gsl_vector_get(filt.x_, 3));
 
         const double x_noise = gsl_ran_gaussian(rng, X_NOISE);
@@ -151,8 +155,10 @@ main(int argc, char** argv)
         gsl_vector_set(filt.u, 0, DT * A_X);
         gsl_vector_set(filt.u, 1, DT * A_Y);
 
-        printf("%f,%f,%f,%f,%f,%f,", gsl_vector_get(filt.x, 0), gsl_matrix_get(filt.P, 0, 0), gsl_vector_get(filt.x, 1),
-               gsl_vector_get(filt.x, 2), gsl_matrix_get(filt.P, 2, 2), gsl_vector_get(filt.x, 3));
+        printf("%f,%f,%f,%f,%f,%f,", gsl_vector_get(filt.x, 0),
+               gsl_matrix_get(filt.P, 0, 0), gsl_vector_get(filt.x, 1),
+               gsl_vector_get(filt.x, 2), gsl_matrix_get(filt.P, 2, 2),
+               gsl_vector_get(filt.x, 3));
 
         printf("%f,%f,%f,%f\n", x, v_x, y, v_y);
     }

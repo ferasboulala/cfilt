@@ -48,7 +48,8 @@ typedef struct
 
 } cfilt_ukf;
 
-int cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k, int (*F)(void*, void*),
+int cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m,
+                    const size_t k, int (*F)(void*, void*),
                     int (*H)(void*, void*), cfilt_sigma_generator* gen);
 
 void cfilt_ukf_free(cfilt_ukf* filt);
