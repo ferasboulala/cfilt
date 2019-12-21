@@ -106,6 +106,8 @@ cfilt_sigma_generator_van_der_merwe_generate(
     // mu +/- variance
     for (size_t i = 0; i < gen->_common.n; ++i)
     {
+        // The following operations work because matrices are row major
+        // And we are working with rows
         gsl_vector_view row = gsl_matrix_row(gen->_chol, i);
         gsl_vector* src = &row.vector;
 

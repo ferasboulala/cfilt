@@ -6,7 +6,6 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$DIR"/../
 pwd
 ./runbuild.sh
-rm tests/*.csv tests/*.png
 
 N_STEPS=100
 DT=0.1
@@ -22,23 +21,25 @@ function test_gh() {
     local GH1=0.5
     local GH2=0.5
 
+    local TDIR="tests/gh/"
+
     echo -e "testing with default parameters"
-    bin/test_gh "$N_STEPS" "$DT" "$X_NOISE" "$V_NOISE" "$A0" "$V0" "$GH0" "$GH1" "$GH2" > "tests/test_gh.csv"
-    python tests/test_gh.py "tests/test_gh.csv" "tests/test_gh.png"
+    bin/test_gh "$N_STEPS" "$DT" "$X_NOISE" "$V_NOISE" "$A0" "$V0" "$GH0" "$GH1" "$GH2" > ""$TDIR"test_gh.csv"
+    python "$TDIR"test_gh.py ""$TDIR"test_gh.csv" ""$TDIR"test_gh.png"
 
     A0=10
 
     echo -e "testing with non zero acceleration"
-    bin/test_gh "$N_STEPS" "$DT" "$X_NOISE" "$V_NOISE" "$A0" "$V0" "$GH0" "$GH1" "$GH2" > "tests/test_gh_acc.csv"
-    python tests/test_gh.py "tests/test_gh_acc.csv" "tests/test_gh_acc.png"
+    bin/test_gh "$N_STEPS" "$DT" "$X_NOISE" "$V_NOISE" "$A0" "$V0" "$GH0" "$GH1" "$GH2" > ""$TDIR"test_gh_acc.csv"
+    python "$TDIR"test_gh.py ""$TDIR"test_gh_acc.csv" ""$TDIR"test_gh_acc.png"
 
     A0=0
     X_NOISE=50
     V_NOISE=20
 
     echo -e "testing with extra noise"
-    bin/test_gh "$N_STEPS" "$DT" "$X_NOISE" "$V_NOISE" "$A0" "$V0" "$GH0" "$GH1" "$GH2" > "tests/test_gh_noisy.csv"
-    python tests/test_gh.py "tests/test_gh_noisy.csv" "tests/test_gh_noisy.png"
+    bin/test_gh "$N_STEPS" "$DT" "$X_NOISE" "$V_NOISE" "$A0" "$V0" "$GH0" "$GH1" "$GH2" > ""$TDIR"test_gh_noisy.csv"
+    python "$TDIR"test_gh.py ""$TDIR"test_gh_noisy.csv" ""$TDIR"test_gh_noisy.png"
 }
 
 function test_kalman1d() {
@@ -49,22 +50,24 @@ function test_kalman1d() {
     local A0=0
     local V0=100
 
+    local TDIR="tests/kalman1d/"
+
     echo -e "testing with default parameters"
-    bin/test_kalman1d "$N_STEPS" "$DT" "$X_NOISE" "$V_NOISE" "$A0" "$V0" > "tests/test_kalman1d.csv"
-    python tests/test_kalman1d.py "tests/test_kalman1d.csv" "tests/test_kalman1d.png"
+    bin/test_kalman1d "$N_STEPS" "$DT" "$X_NOISE" "$V_NOISE" "$A0" "$V0" > ""$TDIR"test_kalman1d.csv"
+    python "$TDIR"test_kalman1d.py ""$TDIR"test_kalman1d.csv" ""$TDIR"test_kalman1d.png"
 
     A0=5
 
     echo -e "testing with non zero acceleration"
-    bin/test_kalman1d "$N_STEPS" "$DT" "$X_NOISE" "$V_NOISE" "$A0" "$V0" > "tests/test_kalman1d_acc.csv"
-    python tests/test_kalman1d.py "tests/test_kalman1d_acc.csv" "tests/test_kalman1d_acc.png"
+    bin/test_kalman1d "$N_STEPS" "$DT" "$X_NOISE" "$V_NOISE" "$A0" "$V0" > ""$TDIR"test_kalman1d_acc.csv"
+    python "$TDIR"test_kalman1d.py ""$TDIR"test_kalman1d_acc.csv" ""$TDIR"test_kalman1d_acc.png"
 
     A0=0
     X_NOISE=10
 
     echo -e "testing with extra noise"
-    bin/test_kalman1d "$N_STEPS" "$DT" "$X_NOISE" "$V_NOISE" "$A0" "$V0" > "tests/test_kalman1d_noisy.csv"
-    python tests/test_kalman1d.py "tests/test_kalman1d_noisy.csv" "tests/test_kalman1d_noisy.png"
+    bin/test_kalman1d "$N_STEPS" "$DT" "$X_NOISE" "$V_NOISE" "$A0" "$V0" > ""$TDIR"test_kalman1d_noisy.csv"
+    python "$TDIR"test_kalman1d.py ""$TDIR"test_kalman1d_noisy.csv" ""$TDIR"test_kalman1d_noisy.png"
 }
 
 function test_kalman() {
@@ -78,17 +81,19 @@ function test_kalman() {
     local A_Y=0
     local Q_VAR=1
 
+    local TDIR="tests/kalman/"
+
     echo -e "testing with default parameters"
-    bin/test_kalman "$N_STEPS" "$DT" "$V_X" "$V_Y" "$X_NOISE" "$Y_NOISE" "$A_X" "$A_Y" "$Q_VAR" > "tests/test_kalman.csv"
-    python tests/test_kalman.py "tests/test_kalman.csv" "tests/test_kalman.png"
+    bin/test_kalman "$N_STEPS" "$DT" "$V_X" "$V_Y" "$X_NOISE" "$Y_NOISE" "$A_X" "$A_Y" "$Q_VAR" > ""$TDIR"test_kalman.csv"
+    python "$TDIR"test_kalman.py ""$TDIR"test_kalman.csv" ""$TDIR"test_kalman.png"
 
     A_X=1
     A_Y=2
     Q_VAR=5
 
     echo -e "testing with non zero acceleration"
-    bin/test_kalman "$N_STEPS" "$DT" "$V_X" "$V_Y" "$X_NOISE" "$Y_NOISE" "$A_X" "$A_Y" "$Q_VAR" > "tests/test_kalman_acc.csv"
-    python tests/test_kalman.py "tests/test_kalman_acc.csv" "tests/test_kalman_acc.png"
+    bin/test_kalman "$N_STEPS" "$DT" "$V_X" "$V_Y" "$X_NOISE" "$Y_NOISE" "$A_X" "$A_Y" "$Q_VAR" > ""$TDIR"test_kalman_acc.csv"
+    python "$TDIR"test_kalman.py ""$TDIR"test_kalman_acc.csv" ""$TDIR"test_kalman_acc.png"
 
     A_X=0
     A_Y=0
@@ -97,8 +102,8 @@ function test_kalman() {
     Y_NOISE=10
 
     echo -e "testing with extra sensor noise"
-    bin/test_kalman "$N_STEPS" "$DT" "$V_X" "$V_Y" "$X_NOISE" "$Y_NOISE" "$A_X" "$A_Y" "$Q_VAR" > "tests/test_kalman_sensor_noisy.csv"
-    python tests/test_kalman.py "tests/test_kalman_sensor_noisy.csv" "tests/test_kalman_sensor_noisy.png"
+    bin/test_kalman "$N_STEPS" "$DT" "$V_X" "$V_Y" "$X_NOISE" "$Y_NOISE" "$A_X" "$A_Y" "$Q_VAR" > ""$TDIR"test_kalman_sensor_noisy.csv"
+    python "$TDIR"test_kalman.py ""$TDIR"test_kalman_sensor_noisy.csv" ""$TDIR"test_kalman_sensor_noisy.png"
 }
 
 echo -e "Starting statistical filters tests"
