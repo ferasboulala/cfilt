@@ -50,14 +50,17 @@ typedef struct
     double kappa;
     double lambda;
 
-    gsl_matrix *_chol;
+    gsl_matrix* _chol;
 } cfilt_sigma_generator_van_der_merwe;
 
-int cfilt_sigma_generator_alloc(cfilt_sigma_generator_type type, cfilt_sigma_generator** gen, const size_t n, ...);
+int cfilt_sigma_generator_alloc(cfilt_sigma_generator_type type,
+                                cfilt_sigma_generator** gen, const size_t n,
+                                ...);
 
 void cfilt_sigma_generator_free(cfilt_sigma_generator* gen);
 
-int cfilt_sigma_generator_generate(cfilt_sigma_generator* gen, const gsl_vector *mu, const gsl_matrix *cov);
+int cfilt_sigma_generator_generate(cfilt_sigma_generator* gen,
+                                   const gsl_vector* mu, const gsl_matrix* cov);
 
 #ifdef __cplusplus
 }

@@ -35,17 +35,17 @@ typedef struct
 {
     gsl_vector* x_;
     gsl_vector* x;
-    
-    gsl_matrix *X;
-    gsl_matrix *Q;
-    gsl_matrix *Y;
+
+    gsl_matrix* X;
+    gsl_matrix* Q;
+    gsl_matrix* Y;
     gsl_matrix* P_;
     gsl_matrix* P;
     gsl_matrix* R;
     gsl_matrix* K;
 
-    gsl_matrix *_Y_X;
-    gsl_matrix *_Y_X_2;
+    gsl_matrix* _Y_X;
+    gsl_matrix* _Y_X_2;
 
     int (*F)(void*, void*);
     int (*H)(void*, void*);

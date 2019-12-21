@@ -36,7 +36,8 @@ cfilt_matrix_invert(gsl_matrix* src, gsl_matrix* dst, gsl_permutation* perm)
     return GSL_SUCCESS;
 }
 
-int cfilt_matrix_tri_zero(gsl_matrix *src, int upper)
+int
+cfilt_matrix_tri_zero(gsl_matrix* src, int upper)
 {
     if (upper)
     {

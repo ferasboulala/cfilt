@@ -20,22 +20,25 @@
 #include "cfilt/sigma.h"
 #include "cfilt/util.h"
 
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 #include <sys/types.h>
 
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_linalg.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
-#include <gsl/gsl_linalg.h>
 
-#define M_ALLOC_ASSERT_VDM(p, n, m) M_ALLOC_ASSERT(p, n, m, cfilt_sigma_generator_van_der_merwe_free, *gen)
-#define V_ALLOC_ASSERT_VDM(v, n) V_ALLOC_ASSERT(v, n, cfilt_sigma_generator_van_der_merwe_free, *gen)
+#define M_ALLOC_ASSERT_VDM(p, n, m)                                            \
+    M_ALLOC_ASSERT(p, n, m, cfilt_sigma_generator_van_der_merwe_free, *gen)
+#define V_ALLOC_ASSERT_VDM(v, n)                                               \
+    V_ALLOC_ASSERT(v, n, cfilt_sigma_generator_van_der_merwe_free, *gen)
 #define VDM(n) (2 * (n) + 1)
 
 static void
-cfilt_sigma_generator_van_der_merwe_free(cfilt_sigma_generator_van_der_merwe *gen)
+cfilt_sigma_generator_van_der_merwe_free(
+  cfilt_sigma_generator_van_der_merwe* gen)
 {
     M_FREE_IF_NOT_NULL(gen->_common.points);
     M_FREE_IF_NOT_NULL(gen->_chol);
@@ -46,7 +49,9 @@ cfilt_sigma_generator_van_der_merwe_free(cfilt_sigma_generator_van_der_merwe *ge
 }
 
 static int
-cfilt_sigma_generator_van_der_merwe_alloc(cfilt_sigma_generator_van_der_merwe **gen, const size_t n, const double alpha, const double beta, const double kappa)
+cfilt_sigma_generator_van_der_merwe_alloc(
+  cfilt_sigma_generator_van_der_merwe** gen, const size_t n, const double alpha,
+  const double beta, const double kappa)
 {
     *gen = malloc(sizeof(cfilt_sigma_generator_van_der_merwe));
     if (*gen == NULL)
@@ -73,7 +78,9 @@ cfilt_sigma_generator_van_der_merwe_alloc(cfilt_sigma_generator_van_der_merwe **
     gsl_vector_set_all(vdm._common.sigma_weights, weight);
 
     gsl_vector_set(vdm._common.mu_weights, 0, vdm.lambda / (vdm.lambda + n));
-    gsl_vector_set(vdm._common.sigma_weights, 0, gsl_vector_get(vdm._common.mu_weights, 0) + 1 - pow(alpha, 2) + beta);
+    gsl_vector_set(vdm._common.sigma_weights, 0,
+                   gsl_vector_get(vdm._common.mu_weights, 0) + 1 -
+                     pow(alpha, 2) + beta);
 
     memcpy(*gen, &vdm, sizeof(cfilt_sigma_generator_van_der_merwe));
 
@@ -81,7 +88,9 @@ cfilt_sigma_generator_van_der_merwe_alloc(cfilt_sigma_generator_van_der_merwe **
 }
 
 static int
-cfilt_sigma_generator_van_der_merwe_generate(cfilt_sigma_generator_van_der_merwe *gen, const gsl_vector *mu, const gsl_matrix *cov)
+cfilt_sigma_generator_van_der_merwe_generate(
+  cfilt_sigma_generator_van_der_merwe* gen, const gsl_vector* mu,
+  const gsl_matrix* cov)
 {
     // X_0
     memcpy(gen->_common.points->data, mu->data, gen->_common.n * mu->stride);
@@ -98,10 +107,10 @@ cfilt_sigma_generator_van_der_merwe_generate(cfilt_sigma_generator_van_der_merwe
     for (size_t i = 0; i < gen->_common.n; ++i)
     {
         gsl_vector_view row = gsl_matrix_row(gen->_chol, i);
-        gsl_vector *src = &row.vector;
+        gsl_vector* src = &row.vector;
 
         row = gsl_matrix_row(gen->_common.points, i + 1);
-        gsl_vector *dst = &row.vector;
+        gsl_vector* dst = &row.vector;
 
         // +
         gsl_vector_memcpy(dst, src);
@@ -120,7 +129,8 @@ cfilt_sigma_generator_van_der_merwe_generate(cfilt_sigma_generator_van_der_merwe
 }
 
 int
-cfilt_sigma_generator_alloc(const cfilt_sigma_generator_type type, cfilt_sigma_generator** gen, const size_t n, ...)
+cfilt_sigma_generator_alloc(const cfilt_sigma_generator_type type,
+                            cfilt_sigma_generator** gen, const size_t n, ...)
 {
     va_list valist;
     switch (type)
@@ -134,7 +144,9 @@ cfilt_sigma_generator_alloc(const cfilt_sigma_generator_type type, cfilt_sigma_g
 
             va_end(valist);
 
-            EXEC_ASSERT(cfilt_sigma_generator_van_der_merwe_alloc, (cfilt_sigma_generator_van_der_merwe**)gen, n, alpha, beta, kappa);
+            EXEC_ASSERT(cfilt_sigma_generator_van_der_merwe_alloc,
+                        (cfilt_sigma_generator_van_der_merwe**)gen, n, alpha,
+                        beta, kappa);
             break;
         default:
             GSL_ERROR("Invalid sigma generator type", GSL_EINVAL);
@@ -149,17 +161,21 @@ cfilt_sigma_generator_free(cfilt_sigma_generator* gen)
     switch (gen->type)
     {
         case CFILT_VAN_DER_MERWE:
-            cfilt_sigma_generator_van_der_merwe_free((cfilt_sigma_generator_van_der_merwe*)gen);
+            cfilt_sigma_generator_van_der_merwe_free(
+              (cfilt_sigma_generator_van_der_merwe*)gen);
             break;
-     }
+    }
 }
 
-int cfilt_sigma_generator_generate(cfilt_sigma_generator* gen, const gsl_vector *mu, const gsl_matrix *cov)
+int
+cfilt_sigma_generator_generate(cfilt_sigma_generator* gen, const gsl_vector* mu,
+                               const gsl_matrix* cov)
 {
     switch (gen->type)
     {
         case CFILT_VAN_DER_MERWE:
-            EXEC_ASSERT(cfilt_sigma_generator_van_der_merwe_generate, (cfilt_sigma_generator_van_der_merwe*)gen, mu, cov);
+            EXEC_ASSERT(cfilt_sigma_generator_van_der_merwe_generate,
+                        (cfilt_sigma_generator_van_der_merwe*)gen, mu, cov);
             break;
         default:
             GSL_ERROR("Could not recognize sigma generator type", GSL_EINVAL);
