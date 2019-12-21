@@ -53,8 +53,8 @@ main(int argc, char** argv)
     const double GH1 = atof(argv[8]);
     const double GH2 = atof(argv[9]);
 
-    gh_filter filter;
-    gh_alloc(&filter, 3);
+    cfilt_gh_filter filter;
+    cfilt_gh_alloc(&filter, 3);
 
     srand(time(NULL));
 
@@ -74,7 +74,7 @@ main(int argc, char** argv)
 
     for (int i = 0; i < N_STEPS; ++i)
     {
-        gh_predict(&filter, DT);
+        cfilt_gh_predict(&filter, DT);
         const double x_pred = filter.x_pred[0];
         const double v_pred = filter.x_pred[1];
         const double a_pred = filter.x_pred[2];
@@ -82,10 +82,10 @@ main(int argc, char** argv)
         const double z_x = position + UNOISE(X_NOISE);
         const double z_v = velocity + UNOISE(V_NOISE);
 
-        gh_write(&filter, z_x, 0);
-        gh_write(&filter, z_v, 1);
+        cfilt_gh_write(&filter, z_x, 0);
+        cfilt_gh_write(&filter, z_v, 1);
 
-        gh_update(&filter, DT);
+        cfilt_gh_update(&filter, DT);
         const double x = filter.x[0];
         const double v = filter.x[1];
         const double a = filter.x[2];
@@ -101,7 +101,7 @@ main(int argc, char** argv)
                z_x, z_v, x, v, a, e_x, e_v, e_a);
     }
 
-    gh_free(&filter);
+    cfilt_gh_free(&filter);
 
     return 0;
 }

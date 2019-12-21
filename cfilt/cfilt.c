@@ -18,6 +18,7 @@
  */
 
 #include "cfilt/cfilt.h"
+#include "cfilt/util.h"
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_errno.h>
@@ -28,18 +29,10 @@
 #include <math.h>
 #include <string.h>
 
-#define FREE_IF_NOT_NULL(m)                                                                                            \
-    if (m)                                                                                                             \
-        gsl_matrix_free(m);
-
 int
 cfilt_discrete_white_noise(gsl_matrix* tau, const double sigma, gsl_matrix* Q)
 {
-    if (gsl_blas_dgemm(CblasNoTrans, CblasTrans, 1.0, tau, tau, 0, Q))
-    {
-        GSL_ERROR("failed to compute Tau Tau^T => Q", GSL_EFAILED);
-    }
-
+    EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasTrans, 1.0, tau, tau, 0, Q);
     gsl_matrix_scale(Q, sigma);
 
     return GSL_SUCCESS;
@@ -49,11 +42,11 @@ static void
 cfilt_mahalanobis_free(gsl_matrix* x_copy, gsl_matrix* mu_copy, gsl_matrix* xmuq, gsl_matrix* cov_inv,
                        gsl_matrix* mahalanobis, gsl_permutation* perm)
 {
-    FREE_IF_NOT_NULL(x_copy);
-    FREE_IF_NOT_NULL(mu_copy);
-    FREE_IF_NOT_NULL(cov_inv);
-    FREE_IF_NOT_NULL(xmuq);
-    FREE_IF_NOT_NULL(mahalanobis);
+    M_FREE_IF_NOT_NULL(x_copy);
+    M_FREE_IF_NOT_NULL(mu_copy);
+    M_FREE_IF_NOT_NULL(cov_inv);
+    M_FREE_IF_NOT_NULL(xmuq);
+    M_FREE_IF_NOT_NULL(mahalanobis);
 
     if (perm)
     {
@@ -75,41 +68,24 @@ cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov, double* res)
     if (!x_copy || !mu_copy || !cov_inv || !mahalanobis || !perm)
     {
         cfilt_mahalanobis_free(x_copy, mu_copy, xmuq, cov_inv, mahalanobis, perm);
-        GSL_ERROR("failed to allocate memory for mahalanobis computation", GSL_ENOMEM);
+
+        return GSL_ENOMEM;
     }
 
     memcpy(x_copy->data, x->data, N * sizeof(double));
     memcpy(mu_copy->data, mu->data, N * sizeof(double));
 
     // x - mu
-    if (gsl_matrix_sub(x_copy, mu_copy))
-    {
-        GSL_ERROR("failed to compute x_copy - mu_copy => x_copy", GSL_EFAILED);
-    }
+    EXEC_ASSERT(gsl_matrix_sub, x_copy, mu_copy);
 
     // Q^(-1)
-    int signum;
-    if (gsl_linalg_LU_decomp(cov, perm, &signum))
-    {
-        GSL_ERROR("failed to compute the LU decomposition of the covariance matrix", GSL_EFAILED);
-    }
-
-    if (gsl_linalg_LU_invert(cov, perm, cov_inv))
-    {
-        GSL_ERROR("failed to compute the inverse of the covariance matrix", GSL_EFAILED);
-    }
+    EXEC_ASSERT(cfilt_matrix_invert, cov, cov_inv, perm);
 
     // (x - mu)Q^T^(-1)
-    if (gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1.0, x_copy, cov_inv, 0, xmuq))
-    {
-        GSL_ERROR("failed to compute (x - mu)^T Q^-1 => xmuq", GSL_EFAILED);
-    }
+    EXEC_ASSERT(gsl_blas_dgemm, CblasTrans, CblasNoTrans, 1.0, x_copy, cov_inv, 0, xmuq);
 
     // (x - mu)Q^-1(x - mu)
-    if (gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, xmuq, x_copy, 0.0, mahalanobis))
-    {
-        GSL_ERROR("failed to compute the final step to mahalanobis distance", GSL_EFAILED);
-    }
+    EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasNoTrans, 1.0, xmuq, x_copy, 0.0, mahalanobis);
 
     *res = sqrt(*(double*)mahalanobis->data);
 
@@ -122,17 +98,14 @@ int
 cfilt_norm_estimated_error_squared(gsl_vector* x_, gsl_matrix* cov, double* res)
 {
     gsl_vector* zero = gsl_vector_alloc(x_->size);
-    if (!zero)
+    if (zero == NULL)
     {
-        GSL_ERROR("failed to allocate memory to compute the nees", GSL_ENOMEM);
+        return GSL_ENOMEM;
     }
 
     gsl_vector_set_zero(zero);
 
-    if (cfilt_mahalanobis(x_, zero, cov, res))
-    {
-        GSL_ERROR("failed to compute the mahalanobis distance with mu=[0] for nees", GSL_EFAILED);
-    }
+    EXEC_ASSERT(cfilt_mahalanobis, x_, zero, cov, res);
 
     *res *= *res;
 

@@ -17,12 +17,13 @@
  * along with cfilt. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CFILT_COMMON_H_
-#define CFILT_COMMON_H_
+#ifndef CFILT_UTIL_H_
+#define CFILT_UTIL_H_
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
+#include <gsl/gsl_permutation.h>
 
 #define FREE_IF_NOT_NULL(p, func)                                                                                      \
     if (p)                                                                                                             \
@@ -52,6 +53,15 @@
         }                                                                                                              \
     } while (0);
 
-int cfilt_matrix_invert(gsl_matrix* mat, ...);
+#define EXEC_ASSERT(func, ...)\
+do\
+{\
+if (func(__VA_ARGS__) != GSL_SUCCESS)\
+{\
+    return GSL_EFAILED;\
+}\
+} while (0);
 
-#endif // CFILT_COMMON_H_
+int cfilt_matrix_invert(gsl_matrix* src, gsl_matrix* dst, gsl_permutation *perm);
+
+#endif // CFILT_UTIL_H_

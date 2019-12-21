@@ -25,40 +25,40 @@
 #include <string.h>
 
 int
-gh_alloc(gh_filter* filt, const size_t dim)
+cfilt_gh_alloc(cfilt_gh_filter* filt, const size_t dim)
 {
     filt->dim = dim;
-    filt->ptr_ = calloc(1, 4 * dim * sizeof(double) + dim * sizeof(char));
-    if (filt->ptr_ == NULL)
+    filt->_ptr = calloc(1, 4 * dim * sizeof(double) + dim * sizeof(char));
+    if (filt->_ptr == NULL)
     {
         GSL_ERROR("failed to allocate space for gh filter", GSL_ENOMEM);
     }
 
-    filt->gh = filt->ptr_;
+    filt->gh = filt->_ptr;
     filt->x = (void*)filt->gh + dim * sizeof(double);
     filt->x_pred = (void*)filt->x + dim * sizeof(double);
-    filt->z_ = (void*)filt->x_pred + dim * sizeof(double);
-    filt->upd_ = (void*)filt->z_ + dim * sizeof(double);
+    filt->_z = (void*)filt->x_pred + dim * sizeof(double);
+    filt->_upd = (void*)filt->_z + dim * sizeof(double);
 
     return GSL_SUCCESS;
 }
 
 void
-gh_free(gh_filter* filt)
+cfilt_gh_free(cfilt_gh_filter* filt)
 {
-    free(filt->ptr_);
-    memset(filt, 0, sizeof(gh_filter));
+    free(filt->_ptr);
+    memset(filt, 0, sizeof(cfilt_gh_filter));
 }
 
 void
-gh_write(gh_filter* filt, double val, const size_t order)
+cfilt_gh_write(cfilt_gh_filter* filt, double val, const size_t order)
 {
-    filt->z_[order] = val;
-    filt->upd_[order] = 1;
+    filt->_z[order] = val;
+    filt->_upd[order] = 1;
 }
 
 void
-gh_predict(gh_filter* filt, const double dt)
+cfilt_gh_predict(cfilt_gh_filter* filt, const double dt)
 {
     for (size_t i = 0; i < filt->dim - 1; ++i)
     {
@@ -77,23 +77,23 @@ gh_predict(gh_filter* filt, const double dt)
 }
 
 void
-gh_update(gh_filter* filt, const double dt)
+cfilt_gh_update(cfilt_gh_filter* filt, const double dt)
 {
-    filt->x[0] += filt->upd_[0] ? (filt->gh[0] * (filt->z_[0] - filt->x_pred[0])) : filt->x_pred[0];
-    filt->upd_[0] = 0;
+    filt->x[0] += filt->_upd[0] ? (filt->gh[0] * (filt->_z[0] - filt->x_pred[0])) : filt->x_pred[0];
+    filt->_upd[0] = 0;
     for (size_t i = filt->dim - 1; i > 0; --i)
     {
         filt->x[i] = filt->x_pred[i];
         double residual = 0.0;
 
-        if (filt->upd_[i])
+        if (filt->_upd[i])
         {
-            residual = filt->z_[i] - filt->x_pred[i];
-            filt->upd_[i] = 0;
+            residual = filt->_z[i] - filt->x_pred[i];
+            filt->_upd[i] = 0;
         }
-        else if (filt->upd_[i - 1])
+        else if (filt->_upd[i - 1])
         {
-            residual = (filt->z_[i - 1] - filt->x[i - 1]) / dt - filt->x_pred[i];
+            residual = (filt->_z[i - 1] - filt->x[i - 1]) / dt - filt->x_pred[i];
         }
 
         filt->x[i] += filt->gh[i] * residual;

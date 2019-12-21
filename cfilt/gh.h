@@ -35,9 +35,9 @@
  * For x_n, it is assumed that the value is constant only during the prediction.
  *
  * When updating the value of a state variable, the value of the residual is computed as:
- *      1) The variable received data: Residual = x_pred_i - z_i
+ *      1) The variable received data: Residual = x_pred_i - _zi
  *      2) If not:
- *          a) The immediate lower order variable received data: Residual = x_pred_i - (x_pred_(i-1) - z_(i - 1)) / dt
+ *          a) The immediate lower order variable received data: Residual = x_pred_i - (x_pred_(i-1) - _z(i - 1)) / dt
  *          b) If not: Residual = 0.
  * In all cases, the update equation is x_i = x_i - gh_i * residual
  *
@@ -62,21 +62,21 @@ typedef struct
     double* x_pred;
     size_t dim;
 
-    char* upd_;
-    double* z_;
-    void* ptr_;
+    char* _upd;
+    double* _z;
+    void* _ptr;
 
-} gh_filter;
+} cfilt_gh_filter;
 
-int gh_alloc(gh_filter* filt, const size_t dim);
+int cfilt_gh_alloc(cfilt_gh_filter* filt, const size_t dim);
 
-void gh_free(gh_filter* filt);
+void cfilt_gh_free(cfilt_gh_filter* filt);
 
-void gh_write(gh_filter* filt, const double val, const size_t ord);
+void cfilt_gh_write(cfilt_gh_filter* filt, const double val, const size_t ord);
 
-void gh_predict(gh_filter* filt, const double dt);
+void cfilt_gh_predict(cfilt_gh_filter* filt, const double dt);
 
-void gh_update(gh_filter* filt, const double dt);
+void cfilt_gh_update(cfilt_gh_filter* filt, const double dt);
 
 #ifdef __cplusplus
 }

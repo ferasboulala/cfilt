@@ -1,0 +1,8 @@
+1. Add util tests
+2. Store test source and results in a directory
+3. Defensive programming when possible
+4. Better reliability tests
+5. Interesting mathematical edge cases tests
+6. Finish ukf
+7. Documentation when necessary (ukf possibly)
+8. Review according to GSL coding guidelines

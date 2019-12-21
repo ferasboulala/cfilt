@@ -18,7 +18,7 @@
  */
 
 #include "cfilt/ukf.h"
-#include "cfilt/common.h"
+#include "cfilt/util.h"
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_matrix.h>

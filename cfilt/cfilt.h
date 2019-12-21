@@ -17,8 +17,8 @@
  * along with cfilt. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _CFILT_H
-#define _CFILT_H
+#ifndef CFILT_H_
+#define CFILT_H_
 
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
@@ -43,4 +43,4 @@ int cfilt_norm_estimated_error_squared(gsl_vector* x_, gsl_matrix* cov, double* 
 }
 #endif
 
-#endif // _CFILT_H
+#endif // CFILT_H_

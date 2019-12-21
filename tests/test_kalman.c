@@ -53,8 +53,8 @@ main(int argc, char** argv)
     gsl_rng* rng = gsl_rng_alloc(gsl_rng_taus);
     gsl_rng_set(rng, time(NULL));
 
-    cfilt_kalman filt;
-    if (cfilt_kalman_alloc(&filt, 4, 2, 2))
+    cfilt_kalman_filter filt;
+    if (cfilt_kalman_filter_alloc(&filt, 4, 2, 2))
     {
         fprintf(stderr, "Could not allocate kalman filter memory\n");
         goto cleanup;
@@ -122,7 +122,7 @@ main(int argc, char** argv)
 
     for (int i = 0; i < N_STEPS; ++i)
     {
-        if (cfilt_kalman_predict(&filt))
+        if (cfilt_kalman_filter_predict(&filt))
         {
             fprintf(stderr, "An error occured with the prediction step\n");
             break;
@@ -142,7 +142,7 @@ main(int argc, char** argv)
         gsl_vector_set(filt.z, 0, x + x_noise);
         gsl_vector_set(filt.z, 1, y + y_noise);
 
-        if (cfilt_kalman_update(&filt))
+        if (cfilt_kalman_filter_update(&filt))
         {
             fprintf(stderr, "An error occured with the update step\n");
             break;
@@ -158,7 +158,7 @@ main(int argc, char** argv)
     }
 
 cleanup:
-    cfilt_kalman_free(&filt);
+    cfilt_kalman_filter_free(&filt);
     gsl_rng_free(rng);
 
     return 0;

@@ -17,9 +17,18 @@
  * along with cfilt. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "cfilt/common.h"
+#include "cfilt/util.h"
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
+#include <gsl/gsl_permutation.h>
+#include <gsl/gsl_linalg.h>
 
-int cfilt_matrix_invert(gsl_matrix* mat, ...);
+int cfilt_matrix_invert(gsl_matrix* src, gsl_matrix* dst, gsl_permutation *perm)
+{
+    int signum;
+    EXEC_ASSERT(gsl_linalg_LU_decomp, src, perm, &signum);
+    EXEC_ASSERT(gsl_linalg_LU_invert, src, perm, dst);
+
+    return GSL_SUCCESS;
+}
