@@ -34,7 +34,7 @@
 #define M_ALLOC_ASSERT(p, n, m, func, ...)                                     \
     do                                                                         \
     {                                                                          \
-        p = gsl_matrix_alloc(n, m);                                            \
+        p = gsl_matrix_alloc((n), (m));                                            \
         if (p == NULL)                                                         \
         {                                                                      \
             func(__VA_ARGS__);                                                 \
@@ -56,13 +56,16 @@
 #define EXEC_ASSERT(func, ...)                                                 \
     do                                                                         \
     {                                                                          \
-        if (func(__VA_ARGS__) != GSL_SUCCESS)                                  \
+        const int status_ = func(__VA_ARGS__);                                 \
+        if (status_ != GSL_SUCCESS)                                            \
         {                                                                      \
-            return GSL_EFAILED;                                                \
+            return status_;                                                    \
         }                                                                      \
     } while (0);
 
 int cfilt_matrix_invert(gsl_matrix* src, gsl_matrix* dst,
                         gsl_permutation* perm);
+
+int cfilt_matrix_tri_zero(gsl_matrix *src, int upper);
 
 #endif // CFILT_UTIL_H_

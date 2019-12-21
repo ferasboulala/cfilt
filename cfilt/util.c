@@ -19,6 +19,8 @@
 
 #include "cfilt/util.h"
 
+#include <sys/types.h>
+
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_matrix.h>
@@ -30,6 +32,32 @@ cfilt_matrix_invert(gsl_matrix* src, gsl_matrix* dst, gsl_permutation* perm)
     int signum;
     EXEC_ASSERT(gsl_linalg_LU_decomp, src, perm, &signum);
     EXEC_ASSERT(gsl_linalg_LU_invert, src, perm, dst);
+
+    return GSL_SUCCESS;
+}
+
+int cfilt_matrix_tri_zero(gsl_matrix *src, int upper)
+{
+    if (upper)
+    {
+        for (size_t i = 1; i < src->size1; ++i)
+        {
+            for (size_t j = 0; j < src->size2; ++j)
+            {
+                gsl_matrix_set(src, i, j, 0);
+            }
+        }
+    }
+    else
+    {
+        for (size_t i = 0; i < src->size1 - 1; ++i)
+        {
+            for (size_t j = 1; j < src->size2; ++j)
+            {
+                gsl_matrix_set(src, i, j, 0);
+            }
+        }
+    }
 
     return GSL_SUCCESS;
 }

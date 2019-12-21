@@ -20,7 +20,10 @@
 #ifndef CFILT_SIGMA_H_
 #define CFILT_SIGMA_H_
 
+#include <sys/types.h>
+
 #include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,23 +35,29 @@ typedef struct
 {
     cfilt_sigma_generator_type type;
     gsl_matrix* points;
+    gsl_vector* mu_weights;
+    gsl_vector* sigma_weights;
+    size_t n;
 } cfilt_sigma_generator_common_;
 
 typedef cfilt_sigma_generator_common_ cfilt_sigma_generator;
 
 typedef struct
 {
-    cfilt_sigma_generator_common_ common_;
+    cfilt_sigma_generator_common_ _common;
     double alpha;
     double beta;
     double kappa;
+    double lambda;
+
+    gsl_matrix *_chol;
 } cfilt_sigma_generator_van_der_merwe;
 
-int cfilt_sigma_alloc(cfilt_sigma_generator_type, cfilt_sigma_generator** gen);
+int cfilt_sigma_generator_alloc(cfilt_sigma_generator_type type, cfilt_sigma_generator** gen, const size_t n, ...);
 
-void cfilt_sigma_free(cfilt_sigma_generator* gen);
+void cfilt_sigma_generator_free(cfilt_sigma_generator* gen);
 
-int cfilt_sigma_generate(cfilt_sigma_generator* gen, gsl_matrix** points);
+int cfilt_sigma_generator_generate(cfilt_sigma_generator* gen, const gsl_vector *mu, const gsl_matrix *cov);
 
 #ifdef __cplusplus
 }
