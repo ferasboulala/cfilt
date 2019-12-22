@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-typedef enum { CFILT_VAN_DER_MERWE = 0 } cfilt_sigma_generator_type;
+typedef enum { CFILT_SIGMA_VAN_DER_MERWE = 0 } cfilt_sigma_generator_type;
 
 typedef struct
 {
@@ -41,17 +41,6 @@ typedef struct
 } cfilt_sigma_generator_common_;
 
 typedef cfilt_sigma_generator_common_ cfilt_sigma_generator;
-
-typedef struct
-{
-    cfilt_sigma_generator_common_ _common;
-    double alpha;
-    double beta;
-    double kappa;
-    double lambda;
-
-    gsl_matrix* _chol;
-} cfilt_sigma_generator_van_der_merwe;
 
 int cfilt_sigma_generator_alloc(cfilt_sigma_generator_type type,
                                 cfilt_sigma_generator** gen, const size_t n,

@@ -43,7 +43,7 @@ cfilt_matrix_tri_zero(gsl_matrix* src, int upper)
     {
         for (size_t i = 1; i < src->size1; ++i)
         {
-            for (size_t j = 0; j < src->size2; ++j)
+            for (size_t j = 0; j < src->size2 - 1; ++j)
             {
                 gsl_matrix_set(src, i, j, 0);
             }

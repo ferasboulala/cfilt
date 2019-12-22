@@ -36,6 +36,17 @@
     V_ALLOC_ASSERT(v, n, cfilt_sigma_generator_van_der_merwe_free, *gen)
 #define VDM(n) (2 * (n) + 1)
 
+typedef struct
+{
+    cfilt_sigma_generator_common_ _common;
+    double alpha;
+    double beta;
+    double kappa;
+    double lambda;
+
+    gsl_matrix* _chol;
+} cfilt_sigma_generator_van_der_merwe;
+
 static void
 cfilt_sigma_generator_van_der_merwe_free(
   cfilt_sigma_generator_van_der_merwe* gen)
@@ -60,7 +71,7 @@ cfilt_sigma_generator_van_der_merwe_alloc(
     }
 
     cfilt_sigma_generator_van_der_merwe vdm;
-    vdm._common.type = CFILT_VAN_DER_MERWE;
+    vdm._common.type = CFILT_SIGMA_VAN_DER_MERWE;
     vdm._common.n = n;
 
     vdm.alpha = alpha;
@@ -73,7 +84,7 @@ cfilt_sigma_generator_van_der_merwe_alloc(
     V_ALLOC_ASSERT_VDM(vdm._common.mu_weights, VDM(n));
     V_ALLOC_ASSERT_VDM(vdm._common.sigma_weights, VDM(n));
 
-    const double weight = 1.0 / 2.0 / n + vdm.lambda;
+    const double weight = 1.0 / 2.0 / (n + vdm.lambda);
     gsl_vector_set_all(vdm._common.mu_weights, weight);
     gsl_vector_set_all(vdm._common.sigma_weights, weight);
 
@@ -93,7 +104,9 @@ cfilt_sigma_generator_van_der_merwe_generate(
   const gsl_matrix* cov)
 {
     // X_0
-    memcpy(gen->_common.points->data, mu->data, gen->_common.n * mu->stride);
+    gsl_vector_view first_row = gsl_matrix_row(gen->_common.points, 0);
+    gsl_vector* first_point = &first_row.vector;
+    gsl_vector_memcpy(first_point, mu);
 
     // sqrt( (n + lambda) * cov )
     EXEC_ASSERT(gsl_matrix_memcpy, gen->_chol, cov);
@@ -111,20 +124,20 @@ cfilt_sigma_generator_van_der_merwe_generate(
         gsl_vector_view row = gsl_matrix_row(gen->_chol, i);
         gsl_vector* src = &row.vector;
 
-        row = gsl_matrix_row(gen->_common.points, i + 1);
-        gsl_vector* dst = &row.vector;
+        gsl_vector_view row1 = gsl_matrix_row(gen->_common.points, i + 1);
+        gsl_vector* dst1 = &row1.vector;
 
         // +
-        gsl_vector_memcpy(dst, src);
-        gsl_vector_add(dst, mu);
+        gsl_vector_memcpy(dst1, src);
+        gsl_vector_add(dst1, mu);
 
-        row = gsl_matrix_row(gen->_common.points, i + 1 + gen->_common.n);
-        dst = &row.vector;
+        gsl_vector_view row2 = gsl_matrix_row(gen->_common.points, i + 1 + gen->_common.n);
+        gsl_vector* dst2 = &row2.vector;
 
         // -
-        gsl_vector_memcpy(dst, src);
-        gsl_vector_sub(dst, src);
-        gsl_vector_scale(dst, -1);
+        gsl_vector_memcpy(dst2, src);
+        gsl_vector_sub(dst2, mu);
+        gsl_vector_scale(dst2, -1);
     }
 
     return GSL_SUCCESS;
@@ -137,7 +150,7 @@ cfilt_sigma_generator_alloc(const cfilt_sigma_generator_type type,
     va_list valist;
     switch (type)
     {
-        case CFILT_VAN_DER_MERWE:
+        case CFILT_SIGMA_VAN_DER_MERWE:
             va_start(valist, n);
 
             const double alpha = va_arg(valist, double);
@@ -162,7 +175,7 @@ cfilt_sigma_generator_free(cfilt_sigma_generator* gen)
 {
     switch (gen->type)
     {
-        case CFILT_VAN_DER_MERWE:
+        case CFILT_SIGMA_VAN_DER_MERWE:
             cfilt_sigma_generator_van_der_merwe_free(
               (cfilt_sigma_generator_van_der_merwe*)gen);
             break;
@@ -175,7 +188,7 @@ cfilt_sigma_generator_generate(cfilt_sigma_generator* gen, const gsl_vector* mu,
 {
     switch (gen->type)
     {
-        case CFILT_VAN_DER_MERWE:
+        case CFILT_SIGMA_VAN_DER_MERWE:
             EXEC_ASSERT(cfilt_sigma_generator_van_der_merwe_generate,
                         (cfilt_sigma_generator_van_der_merwe*)gen, mu, cov);
             break;
