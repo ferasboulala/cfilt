@@ -131,7 +131,8 @@ cfilt_sigma_generator_van_der_merwe_generate(
         gsl_vector_memcpy(dst1, src);
         gsl_vector_add(dst1, mu);
 
-        gsl_vector_view row2 = gsl_matrix_row(gen->_common.points, i + 1 + gen->_common.n);
+        gsl_vector_view row2 =
+          gsl_matrix_row(gen->_common.points, i + 1 + gen->_common.n);
         gsl_vector* dst2 = &row2.vector;
 
         // -
