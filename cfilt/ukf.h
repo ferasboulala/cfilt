@@ -61,7 +61,6 @@ struct cfilt_ukf
     int (*H)(cfilt_ukf* filt, void* ptr);
 
     cfilt_sigma_generator* gen;
-
 };
 
 int cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m,
@@ -70,9 +69,9 @@ int cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m,
 
 void cfilt_ukf_free(cfilt_ukf* filt);
 
-int cfilt_ukf_predict(cfilt_ukf* filt, void *ptr);
+int cfilt_ukf_predict(cfilt_ukf* filt, void* ptr);
 
-int cfilt_ukf_update(cfilt_ukf* filt, void *ptr);
+int cfilt_ukf_update(cfilt_ukf* filt, void* ptr);
 
 #ifdef __cplusplus
 }

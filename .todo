@@ -3,7 +3,7 @@
 3. Defensive programming when possible (with GSL_ERROR when applicable)
 4. Better reliability tests
 5. Interesting mathematical edge cases tests
-    6. Finish ukf
+    6. Finish ukf and move sigma point average and variance computation to sigma module
 7. Documentation when necessary (ukf possibly)
 8. Review according to GSL coding guidelines
 9. ADD SOURCES
