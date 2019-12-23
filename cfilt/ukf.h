@@ -31,38 +31,48 @@
 extern "C" {
 #endif
 
-typedef struct
+struct cfilt_ukf;
+typedef struct cfilt_ukf cfilt_ukf;
+
+struct cfilt_ukf
 {
+    size_t _p;
+
     gsl_vector* x_;
     gsl_vector* x;
+    gsl_vector* z;
+    gsl_vector* u_z;
+    gsl_vector* y;
 
-    gsl_matrix* X;
     gsl_matrix* Q;
     gsl_matrix* Y;
     gsl_matrix* P_;
     gsl_matrix* P;
+    gsl_matrix* P_Z;
     gsl_matrix* R;
     gsl_matrix* K;
+    gsl_matrix* Z;
 
-    gsl_matrix* _Y_X;
-    gsl_matrix* _Y_X_2;
+    gsl_matrix* _Y_x;
+    gsl_matrix* _Y_x_2;
+    gsl_matrix* P_Z_inv;
 
-    int (*F)(void*, void*);
-    int (*H)(void*, void*);
+    int (*F)(cfilt_ukf* filt, void* ptr);
+    int (*H)(cfilt_ukf* filt, void* ptr);
 
     cfilt_sigma_generator* gen;
 
-} cfilt_ukf;
+};
 
 int cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m,
-                    const size_t k, int (*F)(void*, void*),
-                    int (*H)(void*, void*), cfilt_sigma_generator* gen);
+                    const size_t k, int (*F)(cfilt_ukf*, void*),
+                    int (*H)(cfilt_ukf*, void*), cfilt_sigma_generator* gen);
 
 void cfilt_ukf_free(cfilt_ukf* filt);
 
-int cfilt_ukf_predict(cfilt_ukf* filt);
+int cfilt_ukf_predict(cfilt_ukf* filt, void *ptr);
 
-int cfilt_ukf_update(cfilt_ukf* filt);
+int cfilt_ukf_update(cfilt_ukf* filt, void *ptr);
 
 #ifdef __cplusplus
 }
