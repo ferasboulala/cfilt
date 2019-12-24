@@ -51,12 +51,7 @@ static void
 cfilt_sigma_generator_van_der_merwe_free(
   cfilt_sigma_generator_van_der_merwe* gen)
 {
-    M_FREE_IF_NOT_NULL(gen->_common.points);
     M_FREE_IF_NOT_NULL(gen->_chol);
-    V_FREE_IF_NOT_NULL(gen->_common.mu_weights);
-    V_FREE_IF_NOT_NULL(gen->_common.sigma_weights);
-
-    free(gen);
 }
 
 static int
@@ -81,6 +76,7 @@ cfilt_sigma_generator_van_der_merwe_alloc(
 
     M_ALLOC_ASSERT_VDM(vdm._common.points, VDM(n), n);
     M_ALLOC_ASSERT_VDM(vdm._chol, n, n);
+
     V_ALLOC_ASSERT_VDM(vdm._common.mu_weights, VDM(n));
     V_ALLOC_ASSERT_VDM(vdm._common.sigma_weights, VDM(n));
 
@@ -174,6 +170,11 @@ cfilt_sigma_generator_alloc(const cfilt_sigma_generator_type type,
 void
 cfilt_sigma_generator_free(cfilt_sigma_generator* gen)
 {
+    M_FREE_IF_NOT_NULL(gen->points);
+
+    V_FREE_IF_NOT_NULL(gen->mu_weights);
+    V_FREE_IF_NOT_NULL(gen->sigma_weights);
+
     switch (gen->type)
     {
         case CFILT_SIGMA_VAN_DER_MERWE:
@@ -181,6 +182,8 @@ cfilt_sigma_generator_free(cfilt_sigma_generator* gen)
               (cfilt_sigma_generator_van_der_merwe*)gen);
             break;
     }
+
+    free(gen);
 }
 
 int

@@ -34,10 +34,11 @@ typedef enum { CFILT_SIGMA_VAN_DER_MERWE = 0 } cfilt_sigma_generator_type;
 typedef struct
 {
     cfilt_sigma_generator_type type;
+    size_t n;
+
     gsl_matrix* points;
     gsl_vector* mu_weights;
     gsl_vector* sigma_weights;
-    size_t n;
 } cfilt_sigma_generator_common_;
 
 typedef cfilt_sigma_generator_common_ cfilt_sigma_generator;

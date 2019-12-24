@@ -23,6 +23,7 @@
 #include "cfilt/sigma.h"
 
 #include <gsl/gsl_matrix.h>
+#include <gsl/gsl_permutation.h>
 #include <gsl/gsl_vector.h>
 
 #include <sys/types.h>
@@ -48,14 +49,17 @@ struct cfilt_ukf
     gsl_matrix* Y;
     gsl_matrix* P_;
     gsl_matrix* P;
-    gsl_matrix* P_Z;
+    gsl_matrix* P_z;
     gsl_matrix* R;
     gsl_matrix* K;
     gsl_matrix* Z;
 
     gsl_matrix* _Y_x;
-    gsl_matrix* _Y_x_2;
-    gsl_matrix* P_Z_inv;
+    gsl_matrix* _Z_u;
+    gsl_matrix* _P_z_inv;
+    gsl_matrix* _K_P_z;
+
+    gsl_permutation* _perm;
 
     int (*F)(cfilt_ukf* filt, void* ptr);
     int (*H)(cfilt_ukf* filt, void* ptr);

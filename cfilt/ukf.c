@@ -23,6 +23,7 @@
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_matrix.h>
+#include <gsl/gsl_permutation.h>
 #include <gsl/gsl_vector.h>
 
 #include <string.h>
@@ -49,7 +50,6 @@ cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k,
     M_ALLOC_ASSERT_(filt->Y, filt->gen->points->size1, n);
     M_ALLOC_ASSERT_(filt->Q, n, n);
     M_ALLOC_ASSERT_(filt->_Y_x, n, 1);
-    M_ALLOC_ASSERT_(filt->_Y_x_2, n, n);
 
     // update step
     V_ALLOC_ASSERT_(filt->x, n);
@@ -58,10 +58,19 @@ cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k,
 
     M_ALLOC_ASSERT_(filt->P, n, n);
     M_ALLOC_ASSERT_(filt->R, k, k);
-    M_ALLOC_ASSERT_(filt->P_Z, k, k);
+    M_ALLOC_ASSERT_(filt->P_z, k, k);
     M_ALLOC_ASSERT_(filt->K, n, k);
     M_ALLOC_ASSERT_(filt->Z, filt->gen->points->size1, k);
-    M_ALLOC_ASSERT_(filt->P_Z_inv, k, k);
+    M_ALLOC_ASSERT_(filt->_P_z_inv, k, k);
+    M_ALLOC_ASSERT_(filt->_Z_u, k, 1);
+    M_ALLOC_ASSERT_(filt->_P_z_inv, n, k);
+
+    filt->_perm = gsl_permutation_alloc(k);
+    if (filt->_perm == NULL)
+    {
+        cfilt_ukf_free(filt);
+        return GSL_ENOMEM;
+    }
 
     return GSL_SUCCESS;
 }
@@ -78,13 +87,16 @@ cfilt_ukf_free(cfilt_ukf* filt)
     M_FREE_IF_NOT_NULL(filt->Y);
     M_FREE_IF_NOT_NULL(filt->Q);
     M_FREE_IF_NOT_NULL(filt->_Y_x);
-    M_FREE_IF_NOT_NULL(filt->_Y_x_2);
     M_FREE_IF_NOT_NULL(filt->P);
     M_FREE_IF_NOT_NULL(filt->R);
     M_FREE_IF_NOT_NULL(filt->K);
     M_FREE_IF_NOT_NULL(filt->Z);
-    M_FREE_IF_NOT_NULL(filt->P_Z);
-    M_FREE_IF_NOT_NULL(filt->P_Z_inv);
+    M_FREE_IF_NOT_NULL(filt->P_z);
+    M_FREE_IF_NOT_NULL(filt->_P_z_inv);
+    M_FREE_IF_NOT_NULL(filt->_Z_u);
+    M_FREE_IF_NOT_NULL(filt->_K_P_z);
+
+    gsl_permutation_free(filt->_perm);
 }
 
 int
@@ -133,6 +145,7 @@ cfilt_ukf_update(cfilt_ukf* filt, void* ptr)
     EXEC_ASSERT(filt->H, filt, ptr);
 
     // u_z = sum_i [mu_weight * Z_i]
+    gsl_vector_set_zero(filt->u_z);
     for (size_t i = 0; i < filt->gen->points->size1; ++i)
     {
         const double weight = gsl_vector_get(filt->gen->mu_weights, i);
@@ -145,6 +158,67 @@ cfilt_ukf_update(cfilt_ukf* filt, void* ptr)
     // y = z - u_z
     EXEC_ASSERT(gsl_vector_memcpy, filt->z, filt->z);
     EXEC_ASSERT(gsl_vector_sub, filt->y, filt->u_z);
+
+    // P_z = sum_i [sigma_weight * (z_i - u)(z_i - u)^T] + R
+    gsl_matrix_set_zero(filt->P_z);
+    for (size_t i = 0; i < filt->gen->points->size1; ++i)
+    {
+        const double weight = gsl_vector_get(filt->gen->sigma_weights, i);
+        gsl_vector_view row = gsl_matrix_row(filt->Z, i);
+        gsl_vector* point = &row.vector;
+
+        gsl_vector_view dst_row = gsl_matrix_row(filt->_Z_u, 0);
+        gsl_vector* dst = &dst_row.vector;
+
+        EXEC_ASSERT(gsl_vector_memcpy, dst, filt->u_z);
+        EXEC_ASSERT(gsl_vector_sub, dst, point);
+        EXEC_ASSERT(gsl_vector_scale, dst, -1);
+        EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasTrans, weight,
+                    filt->_Z_u, filt->_Z_u, 1, filt->P_z);
+    }
+
+    // K = sum_i [sigma_weight * (Y_i - x_i)(Y_i - x_i)^T]P_z^(-1)
+    gsl_matrix_set_zero(filt->K);
+    for (size_t i = 0; i < filt->gen->points->size1; ++i)
+    {
+        const double weight = gsl_vector_get(filt->gen->sigma_weights, i);
+
+        gsl_vector_view row_z = gsl_matrix_row(filt->Z, i);
+        gsl_vector* point_z = &row_z.vector;
+        gsl_vector_view row_y = gsl_matrix_row(filt->Y, i);
+        gsl_vector* point_y = &row_y.vector;
+
+        gsl_vector_view dst_row_z = gsl_matrix_row(filt->_Z_u, 0);
+        gsl_vector* dst_z = &dst_row_z.vector;
+        gsl_vector_view dst_row_y = gsl_matrix_row(filt->_Y_x, 0);
+        gsl_vector* dst_y = &dst_row_y.vector;
+
+        EXEC_ASSERT(gsl_vector_memcpy, dst_z, filt->u_z);
+        EXEC_ASSERT(gsl_vector_memcpy, dst_y, filt->x_);
+
+        EXEC_ASSERT(gsl_vector_sub, dst_z, point_z);
+        EXEC_ASSERT(gsl_vector_sub, dst_y, point_y);
+
+        EXEC_ASSERT(gsl_vector_scale, dst_z, -1);
+        EXEC_ASSERT(gsl_vector_scale, dst_y, -1);
+
+        EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasTrans, weight,
+                    filt->_Y_x, filt->_Z_u, 1, filt->K);
+    }
+
+    EXEC_ASSERT(cfilt_matrix_invert, filt->P_z, filt->_P_z_inv, filt->_perm);
+
+    // x = x_ + Ky
+    EXEC_ASSERT(gsl_vector_memcpy, filt->x, filt->x_);
+    EXEC_ASSERT(gsl_blas_dgemv, CblasNoTrans, 1.0, filt->K, filt->y, 1.0,
+                filt->x);
+
+    // P = P_ - KP_zK^T
+    EXEC_ASSERT(gsl_matrix_memcpy, filt->P, filt->P_);
+    EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasNoTrans, 1.0, filt->K,
+                filt->P_z, 0.0, filt->_K_P_z);
+    EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasTrans, -1.0, filt->_K_P_z,
+                filt->K, 1.0, filt->P);
 
     return GSL_SUCCESS;
 }
