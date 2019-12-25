@@ -58,6 +58,7 @@ struct cfilt_ukf
     gsl_matrix* _Z_u;
     gsl_matrix* _P_z_inv;
     gsl_matrix* _K_P_z;
+    gsl_matrix* _Y_x_Z_u;
 
     gsl_permutation* _perm;
 

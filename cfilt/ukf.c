@@ -64,6 +64,7 @@ cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k,
     M_ALLOC_ASSERT_(filt->_P_z_inv, k, k);
     M_ALLOC_ASSERT_(filt->_Z_u, k, 1);
     M_ALLOC_ASSERT_(filt->_P_z_inv, n, k);
+    M_ALLOC_ASSERT_(filt->_Y_x_Z_u, n, k);
 
     filt->_perm = gsl_permutation_alloc(k);
     if (filt->_perm == NULL)
@@ -95,6 +96,7 @@ cfilt_ukf_free(cfilt_ukf* filt)
     M_FREE_IF_NOT_NULL(filt->_P_z_inv);
     M_FREE_IF_NOT_NULL(filt->_Z_u);
     M_FREE_IF_NOT_NULL(filt->_K_P_z);
+    M_FREE_IF_NOT_NULL(filt->_Y_x_Z_u);
 
     gsl_permutation_free(filt->_perm);
 }
@@ -156,7 +158,7 @@ cfilt_ukf_update(cfilt_ukf* filt, void* ptr)
     }
 
     // y = z - u_z
-    EXEC_ASSERT(gsl_vector_memcpy, filt->z, filt->z);
+    EXEC_ASSERT(gsl_vector_memcpy, filt->y, filt->z);
     EXEC_ASSERT(gsl_vector_sub, filt->y, filt->u_z);
 
     // P_z = sum_i [sigma_weight * (z_i - u)(z_i - u)^T] + R
@@ -174,11 +176,11 @@ cfilt_ukf_update(cfilt_ukf* filt, void* ptr)
         EXEC_ASSERT(gsl_vector_sub, dst, point);
         EXEC_ASSERT(gsl_vector_scale, dst, -1);
         EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasTrans, weight,
-                    filt->_Z_u, filt->_Z_u, 1, filt->P_z);
+                    filt->_Z_u, filt->_Z_u, 1.0, filt->P_z);
     }
 
-    // K = sum_i [sigma_weight * (Y_i - x_i)(Y_i - x_i)^T]P_z^(-1)
-    gsl_matrix_set_zero(filt->K);
+    // K = sum_i [sigma_weight * (Y_i - x_)(Z_i - u_z)^T]P_z^(-1)
+    gsl_matrix_set_zero(filt->_Y_x_Z_u);
     for (size_t i = 0; i < filt->gen->points->size1; ++i)
     {
         const double weight = gsl_vector_get(filt->gen->sigma_weights, i);
@@ -203,10 +205,11 @@ cfilt_ukf_update(cfilt_ukf* filt, void* ptr)
         EXEC_ASSERT(gsl_vector_scale, dst_y, -1);
 
         EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasTrans, weight,
-                    filt->_Y_x, filt->_Z_u, 1, filt->K);
+                    filt->_Y_x, filt->_Z_u, 1.0, filt->_Y_x_Z_u);
     }
 
     EXEC_ASSERT(cfilt_matrix_invert, filt->P_z, filt->_P_z_inv, filt->_perm);
+    EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasNoTrans, 1.0, filt->_Y_x_Z_u, filt->_P_z_inv, 0.0, filt->K);
 
     // x = x_ + Ky
     EXEC_ASSERT(gsl_vector_memcpy, filt->x, filt->x_);
