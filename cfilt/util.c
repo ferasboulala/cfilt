@@ -19,6 +19,8 @@
 
 #include "cfilt/util.h"
 
+#include <string.h>
+
 #include <sys/types.h>
 
 #include <gsl/gsl_errno.h>
@@ -61,4 +63,26 @@ cfilt_matrix_tri_zero(gsl_matrix* src, int upper)
     }
 
     return GSL_SUCCESS;
+}
+
+int
+cfilt_matrix_cmp(const gsl_matrix* a, const gsl_matrix* b)
+{
+    if (a->size1 != b->size2 || a->size2 != b->size2 || a->tda != b->tda)
+    {
+        return GSL_EBADLEN;
+    }
+
+    return memcmp(a->data, b->data, a->size1 * a->size2 * a->tda);
+}
+
+int
+cfilt_vector_cmp(const gsl_vector* a, const gsl_vector* b)
+{
+    if (a->size != b->size || a->stride != b->stride)
+    {
+        return GSL_EBADLEN;
+    }
+
+    return memcmp(a->data, b->data, a->size * a->stride);
 }

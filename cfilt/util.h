@@ -68,4 +68,8 @@ int cfilt_matrix_invert(gsl_matrix* src, gsl_matrix* dst,
 
 int cfilt_matrix_tri_zero(gsl_matrix* src, int upper);
 
+int cfilt_matrix_cmp(const gsl_matrix* a, const gsl_matrix* b);
+
+int cfilt_vector_cmp(const gsl_vector* a, const gsl_vector* b);
+
 #endif // CFILT_UTIL_H_

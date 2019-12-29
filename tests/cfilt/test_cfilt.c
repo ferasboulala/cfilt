@@ -18,67 +18,57 @@
  */
 
 #include "cfilt/cfilt.h"
+#include "cfilt/util.h"
+#include "utest.h"
 
+#include <math.h>
+
+#include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
-#include <gsl/gsl_vector.h>
 
-#include <stdio.h>
+int
+test_discrete_white_noise(void)
+{
+    static const double DT = 0.1;
+    static const double stddev = 1.0;
 
-#define DT 0.1
+    gsl_matrix* Q = gsl_matrix_alloc(2, 2);
+    gsl_matrix* tau = gsl_matrix_alloc(2, 1);
+    gsl_matrix* expected_result_matrix = gsl_matrix_alloc(2, 2);
+
+    gsl_matrix_set(expected_result_matrix, 0, 0, pow(DT, 4) * 0.25);
+    gsl_matrix_set(expected_result_matrix, 0, 1, pow(DT, 3) * 0.50);
+    gsl_matrix_set(expected_result_matrix, 1, 0, pow(DT, 3) * 0.50);
+    gsl_matrix_set(expected_result_matrix, 1, 1, pow(DT, 2));
+
+    gsl_matrix_set(tau, 0, 0, 0.5 * DT * DT);
+    gsl_matrix_set(tau, 1, 0, DT);
+
+    UTEST_EXEC_ASSERT(cfilt_discrete_white_noise, tau, stddev, Q);
+    UTEST_EXEC_ASSERT(cfilt_matrix_cmp, expected_result_matrix, Q);
+
+    gsl_matrix_free(Q);
+    Q = gsl_matrix_alloc(1, 1);
+
+    UTEST_EXEC_ASSERT_(cfilt_discrete_white_noise, tau, stddev, Q);
+
+    return GSL_SUCCESS;
+}
+
+int
+test_mahalanobis(void)
+{
+    return GSL_SUCCESS;
+}
+
+int
+test_norm_estimated_error_squared(void)
+{
+    return GSL_SUCCESS;
+}
 
 int
 main(void)
 {
-    // Testing the discrete white noise covariance matrix generator
-
-    gsl_matrix* tau = gsl_matrix_alloc(2, 1);
-    gsl_matrix_set(tau, 0, 0, 1.0 / 2 * DT * DT);
-    gsl_matrix_set(tau, 1, 0, DT);
-
-    const double sigma = 5;
-
-    gsl_matrix* Q = gsl_matrix_alloc(2, 2);
-
-    if (cfilt_discrete_white_noise(tau, sigma, Q))
-    {
-        fprintf(stderr, "Failed to compute the covariance matrix\n");
-        goto cleanup;
-    }
-
-    if (gsl_matrix_fprintf(stderr, Q, "%f"))
-    {
-        fprintf(stderr, "Failed to print out the covariance matrix\n");
-        goto cleanup;
-    }
-
-    gsl_vector* x = gsl_vector_alloc(2);
-    gsl_vector_set(x, 0, 1);
-    gsl_vector_set(x, 1, 2);
-
-    gsl_vector* mu = gsl_vector_alloc(2);
-    gsl_vector_set_zero(mu);
-
-    gsl_matrix* cov = gsl_matrix_alloc(2, 2);
-    gsl_matrix_set_identity(cov);
-
-    double res;
-
-    if (cfilt_mahalanobis(x, mu, cov, &res))
-    {
-        fprintf(stderr, "Failed to compute the mahalanobis distance\n");
-    }
-    else
-    {
-        fprintf(stderr, "mahalanobis distance: %f\n", res);
-    }
-
-    gsl_vector_free(x);
-    gsl_vector_free(mu);
-    gsl_matrix_free(cov);
-
-cleanup:
-    gsl_matrix_free(tau);
-    gsl_matrix_free(Q);
-
-    return 0;
+    return GSL_SUCCESS;
 }

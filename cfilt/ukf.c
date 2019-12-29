@@ -209,7 +209,8 @@ cfilt_ukf_update(cfilt_ukf* filt, void* ptr)
     }
 
     EXEC_ASSERT(cfilt_matrix_invert, filt->P_z, filt->_P_z_inv, filt->_perm);
-    EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasNoTrans, 1.0, filt->_Y_x_Z_u, filt->_P_z_inv, 0.0, filt->K);
+    EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasNoTrans, 1.0, filt->_Y_x_Z_u,
+                filt->_P_z_inv, 0.0, filt->K);
 
     // x = x_ + Ky
     EXEC_ASSERT(gsl_vector_memcpy, filt->x, filt->x_);

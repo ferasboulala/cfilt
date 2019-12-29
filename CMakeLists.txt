@@ -13,7 +13,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 project(cfilt C)
 
-include_directories(. tests)
+include_directories(. examples tests)
 file(GLOB SRC_FILES cfilt/*.c)
 
 macro(binary prog_name prog_src)
@@ -21,8 +21,17 @@ macro(binary prog_name prog_src)
     target_link_libraries(${prog_name} m gsl gslcblas)
 endmacro()
 
-binary(test_gh tests/gh/test_gh.c)
-binary(test_kalman1d tests/kalman1d/test_kalman1d.c)
-binary(test_kalman tests/kalman/test_kalman.c)
-binary(test_cfilt tests/cfilt/test_cfilt.c)
-binary(test_sigma tests/sigma/test_sigma.c)
+enable_testing()
+macro(unit_test test_name test_source)
+    add_executable(${test_name} ${test_source} ${SRC_FILES})
+    add_test(${test_name} ${CMAKE_CURRENT_SOURCE_DIR}/bin/${test_name})
+    target_link_libraries(${test_name} m gsl gslcblas)
+endmacro()
+
+unit_test(test_cfilt tests/cfilt/test_cfilt.c)
+
+binary(example_gh examples/gh/example_gh.c)
+binary(example_kalman1d examples/kalman1d/example_kalman1d.c)
+binary(example_kalman examples/kalman/example_kalman.c)
+binary(example_cfilt examples/cfilt/example_cfilt.c)
+binary(example_sigma examples/sigma/example_sigma.c)

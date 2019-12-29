@@ -12,3 +12,7 @@ clang-format -i *.c *.h
 cd ../tests
 pwd
 find -name "*.h" -or -name "*.c" | xargs clang-format -i
+
+cd ../examples
+pwd
+find -name "*.h" -or -name "*.c" | xargs clang-format -i
