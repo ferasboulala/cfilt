@@ -28,7 +28,7 @@ macro(unit_test test_name test_source)
     target_link_libraries(${test_name} m gsl gslcblas)
 endmacro()
 
-unit_test(test_cfilt tests/cfilt/test_cfilt.c)
+unit_test(test_cfilt tests/test_cfilt.c)
 
 binary(example_gh examples/gh/example_gh.c)
 binary(example_kalman1d examples/kalman1d/example_kalman1d.c)

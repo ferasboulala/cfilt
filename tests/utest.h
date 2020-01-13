@@ -22,7 +22,17 @@
 
 #include "cfilt/util.h"
 
+#include <stdio.h>
+#include <math.h>
+
 #include <gsl/gsl_errno.h>
+
+#define RUN_TEST(test_name)\
+    if (test_name())\
+{\
+    fprintf(stderr, #test_name" failed\n");\
+    return GSL_EFAILED;\
+}\
 
 #define UTEST_EXEC_ASSERT(func, ...) EXEC_ASSERT(func, __VA_ARGS__);
 #define UTEST_EXEC_ASSERT_(func, ...)                                          \
@@ -35,11 +45,17 @@
         }                                                                      \
     } while (0);
 
-#define UTEST_ASSERT(x)                                                        \
-    if (x)                                                                     \
-        return GSL_EFAILED;
-#define UTEST_ASSERT_(x)                                                       \
-    if (!x)                                                                    \
-        return GSL_EFAILED;
+#define UTEST_ASSERT(x, msg, ...)                                                      \
+    if (!x)\
+{\
+    fprintf(stderr, msg "\n", ##__VA_ARGS__);\
+        return GSL_EFAILED;\
+}\
+
+#define UTEST_ASSERT_TOL(x_, x, tol, msg, ...)\
+if (abs(x_ - x) > tol)\
+{\
+    UTEST_ASSERT(0, msg, ##__VA_ARGS__);\
+}\
 
 #endif // UTEST_H_

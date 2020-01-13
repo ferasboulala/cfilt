@@ -26,6 +26,7 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
 #include <gsl/gsl_permutation.h>
 
 int
@@ -66,14 +67,28 @@ cfilt_matrix_tri_zero(gsl_matrix* src, int upper)
 }
 
 int
-cfilt_matrix_cmp(const gsl_matrix* a, const gsl_matrix* b)
+cfilt_matrix_cmp(gsl_matrix* a, gsl_matrix* b)
 {
     if (a->size1 != b->size2 || a->size2 != b->size2 || a->tda != b->tda)
     {
         return GSL_EBADLEN;
     }
 
-    return memcmp(a->data, b->data, a->size1 * a->size2 * a->tda);
+    for (size_t i = 0; i < a->size1; ++i)
+    {
+        gsl_vector_view row1 = gsl_matrix_row(a, i);
+        gsl_vector_view row2 = gsl_matrix_row(b, i);
+
+        gsl_vector *vec1 = &row1.vector;
+        gsl_vector *vec2 = &row2.vector;
+
+        if (memcmp(vec1->data, vec2->data, vec1->size * vec1->stride))
+        {
+            return GSL_EFAILED;
+        }
+    }
+
+    return GSL_SUCCESS;
 }
 
 int

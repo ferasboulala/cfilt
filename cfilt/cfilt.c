@@ -74,8 +74,14 @@ cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov, double* res)
         return GSL_ENOMEM;
     }
 
-    memcpy(x_copy->data, x->data, N * sizeof(double));
-    memcpy(mu_copy->data, mu->data, N * sizeof(double));
+    // TODO : Make this a util function
+    gsl_vector_view x_copy_view = gsl_matrix_column(x_copy, 0);
+    gsl_vector *x_copy_vector = &x_copy_view.vector;
+    EXEC_ASSERT(gsl_vector_memcpy, x_copy_vector, x);
+
+    gsl_vector_view mu_copy_view = gsl_matrix_column(mu_copy, 0);
+    gsl_vector *mu_copy_vector = &mu_copy_view.vector;
+    EXEC_ASSERT(gsl_vector_memcpy, mu_copy_vector, mu);
 
     // x - mu
     EXEC_ASSERT(gsl_matrix_sub, x_copy, mu_copy);
@@ -83,9 +89,9 @@ cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov, double* res)
     // Q^(-1)
     EXEC_ASSERT(cfilt_matrix_invert, cov, cov_inv, perm);
 
-    // (x - mu)Q^T^(-1)
+    // (x - mu)^TQ^(-1)
     EXEC_ASSERT(gsl_blas_dgemm, CblasTrans, CblasNoTrans, 1.0, x_copy, cov_inv,
-                0, xmuq);
+                0.0, xmuq);
 
     // (x - mu)Q^-1(x - mu)
     EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasNoTrans, 1.0, xmuq, x_copy,
@@ -101,6 +107,10 @@ cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov, double* res)
 int
 cfilt_norm_estimated_error_squared(gsl_vector* x_, gsl_matrix* cov, double* res)
 {
+    // Here, x_ = x - x_estimation
+    // We do not compute the difference here because it would require an
+    // intermediary result which requires memory allocation.
+    // Unlike the previous function, this one is simple enough not to do it.
     gsl_vector* zero = gsl_vector_alloc(x_->size);
     if (zero == NULL)
     {
