@@ -76,11 +76,11 @@ cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov, double* res)
 
     // TODO : Make this a util function
     gsl_vector_view x_copy_view = gsl_matrix_column(x_copy, 0);
-    gsl_vector *x_copy_vector = &x_copy_view.vector;
+    gsl_vector* x_copy_vector = &x_copy_view.vector;
     EXEC_ASSERT(gsl_vector_memcpy, x_copy_vector, x);
 
     gsl_vector_view mu_copy_view = gsl_matrix_column(mu_copy, 0);
-    gsl_vector *mu_copy_vector = &mu_copy_view.vector;
+    gsl_vector* mu_copy_vector = &mu_copy_view.vector;
     EXEC_ASSERT(gsl_vector_memcpy, mu_copy_vector, mu);
 
     // x - mu

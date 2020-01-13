@@ -57,9 +57,9 @@ int
 test_mahalanobis(void)
 {
     // With identity cov, it should be the euclidean distance
-    gsl_vector *x = gsl_vector_alloc(3);
-    gsl_vector *mu = gsl_vector_alloc(3);
-    gsl_matrix *cov = gsl_matrix_alloc(3, 3);
+    gsl_vector* x = gsl_vector_alloc(3);
+    gsl_vector* mu = gsl_vector_alloc(3);
+    gsl_matrix* cov = gsl_matrix_alloc(3, 3);
 
     gsl_vector_set(x, 0, 1.0);
     gsl_vector_set(x, 1, 2.0);
@@ -70,7 +70,8 @@ test_mahalanobis(void)
     double distance;
     UTEST_EXEC_ASSERT(cfilt_mahalanobis, x, mu, cov, &distance);
     const double expected_distance = sqrt(1.0 + 4.0 + 9.0);
-    UTEST_ASSERT_TOL(distance, expected_distance, 0.1, "Expected value is not matched");
+    UTEST_ASSERT_TOL(distance, expected_distance, 0.1,
+                     "Expected value is not matched");
 
     gsl_vector_free(x);
     gsl_vector_free(mu);
@@ -92,7 +93,9 @@ test_norm_estimated_error_squared(void)
 
     double nees;
     UTEST_EXEC_ASSERT(cfilt_norm_estimated_error_squared, x, cov, &nees);
-    UTEST_ASSERT_TOL(1.0 + 4.0 + 9.0, nees, 0.1, "Expected value is not matched. Got %f, expected %f", nees, 14.0);
+    UTEST_ASSERT_TOL(1.0 + 4.0 + 9.0, nees, 0.1,
+                     "Expected value is not matched. Got %f, expected %f", nees,
+                     14.0);
 
     gsl_vector_free(x);
     gsl_matrix_free(cov);

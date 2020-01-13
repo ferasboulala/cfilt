@@ -26,8 +26,8 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_matrix.h>
-#include <gsl/gsl_vector.h>
 #include <gsl/gsl_permutation.h>
+#include <gsl/gsl_vector.h>
 
 int
 cfilt_matrix_invert(gsl_matrix* src, gsl_matrix* dst, gsl_permutation* perm)
@@ -79,8 +79,8 @@ cfilt_matrix_cmp(gsl_matrix* a, gsl_matrix* b)
         gsl_vector_view row1 = gsl_matrix_row(a, i);
         gsl_vector_view row2 = gsl_matrix_row(b, i);
 
-        gsl_vector *vec1 = &row1.vector;
-        gsl_vector *vec2 = &row2.vector;
+        gsl_vector* vec1 = &row1.vector;
+        gsl_vector* vec2 = &row2.vector;
 
         if (memcmp(vec1->data, vec2->data, vec1->size * vec1->stride))
         {
