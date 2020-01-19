@@ -30,7 +30,8 @@
 #include <gsl/gsl_vector.h>
 
 /**
- * Some of the functions in this module could be optimized. The choice of implementation
+ * Some of the functions in this module could be optimized. The choice of
+ * implementation
  * is not entirely arbitrary. I opted for simplicity and readability.
  *
  * These functions are not meant to be used outside of cfilt modules.
@@ -140,7 +141,7 @@ cfilt_vector_cmp(const gsl_vector* a, const gsl_vector* b)
 }
 
 int
-cfilt_vector_cmp_tol(const gsl_vector *a, const gsl_vector *b, const double tol)
+cfilt_vector_cmp_tol(const gsl_vector* a, const gsl_vector* b, const double tol)
 {
     if (a->size != b->size || a->stride != b->stride)
     {

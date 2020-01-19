@@ -39,7 +39,7 @@
     do                                                                         \
     {                                                                          \
         const int status_ = func(__VA_ARGS__);                                 \
-        if (status_ == GSL_SUCCESS)                                                          \
+        if (status_ == GSL_SUCCESS)                                            \
         {                                                                      \
             return GSL_EFAILED;                                                \
         }                                                                      \

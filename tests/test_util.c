@@ -26,10 +26,10 @@
 int
 test_cfilt_matrix_invert(void)
 {
-    gsl_matrix *src = gsl_matrix_alloc(2, 2);
-    gsl_matrix *dst = gsl_matrix_alloc(2, 2);
-    gsl_matrix *sol = gsl_matrix_alloc(2, 2);
-    gsl_permutation *perm = gsl_permutation_alloc(2);
+    gsl_matrix* src = gsl_matrix_alloc(2, 2);
+    gsl_matrix* dst = gsl_matrix_alloc(2, 2);
+    gsl_matrix* sol = gsl_matrix_alloc(2, 2);
+    gsl_permutation* perm = gsl_permutation_alloc(2);
 
     gsl_matrix_set(src, 0, 0, 1.0);
     gsl_matrix_set(src, 0, 1, 2.0);
@@ -72,8 +72,8 @@ test_cfilt_matrix_invert(void)
 int
 test_cfilt_matrix_tri_zero(void)
 {
-    gsl_matrix *src = gsl_matrix_alloc(3, 3);
-    gsl_matrix *sol = gsl_matrix_alloc(3, 3);
+    gsl_matrix* src = gsl_matrix_alloc(3, 3);
+    gsl_matrix* sol = gsl_matrix_alloc(3, 3);
 
     gsl_matrix_set_identity(src);
     gsl_matrix_set_identity(sol);
@@ -102,8 +102,8 @@ test_cfilt_matrix_tri_zero(void)
 int
 test_cfilt_matrix_cmp(void)
 {
-    gsl_matrix *a = gsl_matrix_alloc(3, 3);
-    gsl_matrix *b = gsl_matrix_alloc(3, 3);
+    gsl_matrix* a = gsl_matrix_alloc(3, 3);
+    gsl_matrix* b = gsl_matrix_alloc(3, 3);
 
     gsl_matrix_set_zero(a);
     gsl_matrix_set_identity(b);
@@ -128,14 +128,14 @@ test_cfilt_matrix_cmp(void)
 int
 test_cfilt_matrix_cmp_tol(void)
 {
-    gsl_matrix *a = gsl_matrix_alloc(3, 3);
-    gsl_matrix *b = gsl_matrix_alloc(3, 3);
+    gsl_matrix* a = gsl_matrix_alloc(3, 3);
+    gsl_matrix* b = gsl_matrix_alloc(3, 3);
 
     gsl_matrix_set_zero(a);
     gsl_matrix_set_all(b, 0.01);
 
     UTEST_EXEC_ASSERT(cfilt_matrix_cmp_tol, a, b, 0.1);
-    
+
     gsl_matrix_set_all(b, 1.0);
 
     UTEST_EXEC_ASSERT_(cfilt_matrix_cmp_tol, a, b, 0.1);
@@ -154,8 +154,8 @@ test_cfilt_matrix_cmp_tol(void)
 int
 test_cfilt_vector_cmp(void)
 {
-    gsl_vector *a = gsl_vector_alloc(3);
-    gsl_vector *b = gsl_vector_alloc(3);
+    gsl_vector* a = gsl_vector_alloc(3);
+    gsl_vector* b = gsl_vector_alloc(3);
 
     gsl_vector_set_zero(a);
     gsl_vector_set_all(b, 1.0);
@@ -180,8 +180,8 @@ test_cfilt_vector_cmp(void)
 int
 test_cfilt_vector_cmp_tol(void)
 {
-    gsl_vector *a = gsl_vector_alloc(3);
-    gsl_vector *b = gsl_vector_alloc(3);
+    gsl_vector* a = gsl_vector_alloc(3);
+    gsl_vector* b = gsl_vector_alloc(3);
 
     gsl_vector_set_zero(a);
     gsl_vector_set_all(b, 0.05);
