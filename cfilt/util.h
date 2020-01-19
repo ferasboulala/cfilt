@@ -25,11 +25,15 @@
 #include <gsl/gsl_permutation.h>
 #include <gsl/gsl_vector.h>
 
+#include <math.h>
+
 #define FREE_IF_NOT_NULL(p, func)                                              \
     if (p)                                                                     \
         func(p);
 #define V_FREE_IF_NOT_NULL(v) FREE_IF_NOT_NULL(v, gsl_vector_free)
 #define M_FREE_IF_NOT_NULL(m) FREE_IF_NOT_NULL(m, gsl_matrix_free)
+
+#define IS_EQ_TOL(x, y, tol) (abs(x - y) < tol)
 
 #define M_ALLOC_ASSERT(p, n, m, func, ...)                                     \
     do                                                                         \
@@ -70,6 +74,10 @@ int cfilt_matrix_tri_zero(gsl_matrix* src, int upper);
 
 int cfilt_matrix_cmp(gsl_matrix* a, gsl_matrix* b);
 
+int cfilt_matrix_cmp_tol(const gsl_matrix* a, const gsl_matrix* b, const double tol);
+
 int cfilt_vector_cmp(const gsl_vector* a, const gsl_vector* b);
+
+int cfilt_vector_cmp_tol(const gsl_vector *a, const gsl_vector *b, const double tol);
 
 #endif // CFILT_UTIL_H_
