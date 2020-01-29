@@ -31,6 +31,7 @@ endmacro()
 unit_test(test_cfilt tests/test_cfilt.c)
 unit_test(test_util  tests/test_util.c)
 unit_test(test_sigma tests/test_sigma.c)
+unit_test(test_gh    tests/test_gh.c)
 
 binary(example_gh       examples/gh/example_gh.c)
 binary(example_kalman1d examples/kalman1d/example_kalman1d.c)

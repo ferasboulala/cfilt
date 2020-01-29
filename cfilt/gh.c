@@ -27,6 +27,11 @@
 int
 cfilt_gh_alloc(cfilt_gh_filter* filt, const size_t dim)
 {
+    if (dim == 0)
+    {
+        GSL_ERROR("cannot initialize a gh filter of size 0", GSL_EINVAL);
+    }
+
     filt->dim = dim;
     filt->_ptr = calloc(1, 4 * dim * sizeof(double) + dim * sizeof(char));
     if (filt->_ptr == NULL)

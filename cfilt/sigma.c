@@ -148,6 +148,11 @@ int
 cfilt_sigma_generator_alloc(const cfilt_sigma_generator_type type,
                             cfilt_sigma_generator** gen, const size_t n, ...)
 {
+    if (n == 0)
+    {
+        GSL_ERROR("cannot initialize a generator of dimension 0", GSL_EINVAL);
+    }
+
     va_list valist;
     switch (type)
     {
