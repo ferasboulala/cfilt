@@ -41,14 +41,17 @@
         const int status_ = func(__VA_ARGS__);                                 \
         if (status_ == GSL_SUCCESS)                                            \
         {                                                                      \
+            fprintf(stderr, "%s:%d - Non-zero exit code for function %s\n",    \
+                    __FILE__, __LINE__, #func);                                \
             return GSL_EFAILED;                                                \
         }                                                                      \
     } while (0);
 
 #define UTEST_ASSERT(x, msg, ...)                                              \
-    if (!x)                                                                    \
+    if (!(x))                                                                  \
     {                                                                          \
-        fprintf(stderr, msg "\n", ##__VA_ARGS__);                              \
+        fprintf(stderr, "Failed assertion @ %s:%u " msg "\n", __FILE__,        \
+                __LINE__, ##__VA_ARGS__);                                      \
         return GSL_EFAILED;                                                    \
     }
 

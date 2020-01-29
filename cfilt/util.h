@@ -33,7 +33,7 @@
 #define V_FREE_IF_NOT_NULL(v) FREE_IF_NOT_NULL(v, gsl_vector_free)
 #define M_FREE_IF_NOT_NULL(m) FREE_IF_NOT_NULL(m, gsl_matrix_free)
 
-#define IS_EQ_TOL(x, y, tol) (abs(x - y) < tol)
+#define IS_EQ_TOL(x, y, tol) (abs(x - y) <= tol)
 
 #define M_ALLOC_ASSERT(p, n, m, func, ...)                                     \
     do                                                                         \

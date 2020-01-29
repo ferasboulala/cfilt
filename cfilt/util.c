@@ -34,7 +34,8 @@
  * implementation
  * is not entirely arbitrary. I opted for simplicity and readability.
  *
- * These functions are not meant to be used outside of cfilt modules.
+ * These functions are not meant to be used outside of cfilt modules and most
+ * of them are used in unit testing anyway (comparison functions for instance).
  */
 
 int
@@ -50,11 +51,11 @@ cfilt_matrix_invert(gsl_matrix* src, gsl_matrix* dst, gsl_permutation* perm)
 int
 cfilt_matrix_tri_zero(gsl_matrix* src, int upper)
 {
-    if (upper)
+    if (!upper)
     {
-        for (size_t i = 1; i < src->size1; ++i)
+        for (size_t j = 0; j < src->size2 - 1; ++j)
         {
-            for (size_t j = 0; j < src->size2 - 1; ++j)
+            for (size_t i = j + 1; i < src->size1; ++i)
             {
                 gsl_matrix_set(src, i, j, 0.0);
             }
@@ -64,7 +65,7 @@ cfilt_matrix_tri_zero(gsl_matrix* src, int upper)
     {
         for (size_t i = 0; i < src->size1 - 1; ++i)
         {
-            for (size_t j = 1; j < src->size2; ++j)
+            for (size_t j = i + 1; j < src->size2; ++j)
             {
                 gsl_matrix_set(src, i, j, 0.0);
             }
@@ -77,26 +78,7 @@ cfilt_matrix_tri_zero(gsl_matrix* src, int upper)
 int
 cfilt_matrix_cmp(gsl_matrix* a, gsl_matrix* b)
 {
-    if (a->size1 != b->size2 || a->size2 != b->size2 || a->tda != b->tda)
-    {
-        return GSL_EBADLEN;
-    }
-
-    for (size_t i = 0; i < a->size1; ++i)
-    {
-        gsl_vector_view row1 = gsl_matrix_row(a, i);
-        gsl_vector_view row2 = gsl_matrix_row(b, i);
-
-        gsl_vector* vec1 = &row1.vector;
-        gsl_vector* vec2 = &row2.vector;
-
-        if (memcmp(vec1->data, vec2->data, vec1->size * a->tda))
-        {
-            return GSL_EFAILED;
-        }
-    }
-
-    return GSL_SUCCESS;
+    return cfilt_matrix_cmp_tol(a, b, 0.0);
 }
 
 int
@@ -127,17 +109,7 @@ cfilt_matrix_cmp_tol(const gsl_matrix* a, const gsl_matrix* b, const double tol)
 int
 cfilt_vector_cmp(const gsl_vector* a, const gsl_vector* b)
 {
-    if (a->size != b->size || a->stride != b->stride)
-    {
-        return GSL_EBADLEN;
-    }
-
-    if (memcmp(a->data, b->data, a->size * a->stride * sizeof(double)) != 0)
-    {
-        return GSL_EFAILED;
-    }
-
-    return GSL_SUCCESS;
+    return cfilt_vector_cmp_tol(a, b, 0.0);
 }
 
 int

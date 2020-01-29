@@ -82,7 +82,7 @@ test_cfilt_matrix_tri_zero(void)
     gsl_matrix_set(src, 0, 2, 1.0);
     gsl_matrix_set(src, 1, 2, 1.0);
 
-    UTEST_EXEC_ASSERT(cfilt_matrix_tri_zero, src, 0);
+    UTEST_EXEC_ASSERT(cfilt_matrix_tri_zero, src, 1);
     UTEST_EXEC_ASSERT(cfilt_matrix_cmp, src, sol);
 
     gsl_matrix_set_identity(src);
@@ -90,7 +90,7 @@ test_cfilt_matrix_tri_zero(void)
     gsl_matrix_set(src, 2, 0, 1.0);
     gsl_matrix_set(src, 2, 1, 1.0);
 
-    UTEST_EXEC_ASSERT(cfilt_matrix_tri_zero, src, 1);
+    UTEST_EXEC_ASSERT(cfilt_matrix_tri_zero, src, 0);
     UTEST_EXEC_ASSERT(cfilt_matrix_cmp, src, sol);
 
     gsl_matrix_free(src);

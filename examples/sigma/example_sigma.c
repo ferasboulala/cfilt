@@ -29,11 +29,6 @@
 #define BETA 2.0
 #define KAPPA 3.0 - N
 
-/**
- * This test emulates an entity moving in a straight line, in 2D. Its sensors
- * yield
- * position and velocity.
- */
 int
 main(int argc, char** argv)
 {

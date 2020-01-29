@@ -109,14 +109,18 @@ cfilt_sigma_generator_van_der_merwe_generate(
     gsl_matrix_scale(gen->_chol, gen->_common.n + gen->lambda);
     EXEC_ASSERT(gsl_linalg_cholesky_decomp1, gen->_chol);
 
-    // gsl will return a lower triangular matrix. We expect an upper one.
+    // gsl will return a lower triangular matrix and stores the original
+    // matrix in the upper matrix. We must zero out that upper matrix
+    // but whether or not the result is upper or lower is irrelevant for
+    // as long as we pick either columns or rows, respectively.
     EXEC_ASSERT(cfilt_matrix_tri_zero, gen->_chol, 1);
 
     // mu +/- variance
     for (size_t i = 0; i < gen->_common.n; ++i)
     {
         // The following operations work because matrices are row major
-        // And we are working with rows
+        // And we are working with rows because the cholesky decomposition
+        // returned a lower triangular matrix
         gsl_vector_view row = gsl_matrix_row(gen->_chol, i);
         gsl_vector* src = &row.vector;
 
