@@ -39,17 +39,22 @@ cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k,
 {
     if (n * m * k == 0 || n == 1)
     {
-        GSL_ERROR("n, m and k must be positive integers. n must be greater than 1", GSL_EINVAL);
+        GSL_ERROR(
+          "n, m and k must be positive integers. n must be greater than 1",
+          GSL_EINVAL);
     }
 
     if (F == NULL || H == NULL)
     {
-        GSL_ERROR("F and H must be non null pointers to a function", GSL_EINVAL);
+        GSL_ERROR("F and H must be non null pointers to a function",
+                  GSL_EINVAL);
     }
 
     if (gen->points->size2 != n)
     {
-        GSL_ERROR("Sigma generator dimensionality does not match filter's dimensions", GSL_EINVAL);
+        GSL_ERROR(
+          "Sigma generator dimensionality does not match filter's dimensions",
+          GSL_EINVAL);
     }
 
     memset(filt, 0, sizeof(cfilt_ukf));

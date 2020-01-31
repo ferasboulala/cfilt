@@ -40,7 +40,9 @@ cfilt_kalman_filter_alloc(cfilt_kalman_filter* filt, const size_t n,
 {
     if (n * m * k == 0 || n == 1)
     {
-        GSL_ERROR("n m and k must be non zero positive integers and n must be greater than 1", GSL_EINVAL);
+        GSL_ERROR("n m and k must be non zero positive integers and n must be "
+                  "greater than 1",
+                  GSL_EINVAL);
     }
 
     memset(filt, 0, sizeof(cfilt_kalman_filter));

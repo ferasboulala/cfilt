@@ -17,8 +17,8 @@
  * along with cfilt. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "cfilt/ukf.h"
 #include "cfilt/sigma.h"
+#include "cfilt/ukf.h"
 #include "utest.h"
 
 #include <gsl/gsl_errno.h>
@@ -36,16 +36,21 @@ int
 test_ukf_alloc(void)
 {
     cfilt_ukf filt;
-    cfilt_sigma_generator *gen;
-    UTEST_EXEC_ASSERT(cfilt_sigma_generator_alloc, CFILT_SIGMA_VAN_DER_MERWE, &gen, 3, 0.5, 2.0, 1.0);
-    
+    cfilt_sigma_generator* gen;
+    UTEST_EXEC_ASSERT(cfilt_sigma_generator_alloc, CFILT_SIGMA_VAN_DER_MERWE,
+                      &gen, 3, 0.5, 2.0, 1.0);
+
     gsl_error_handler_t* hdl = gsl_set_error_handler_off();
-    UTEST_EXEC_ASSERT_(cfilt_ukf_alloc, &filt, 0, 3, 3, some_function, some_function, gen);
-    UTEST_EXEC_ASSERT_(cfilt_ukf_alloc, &filt, 3, 3, 3, NULL, some_function, gen);
-    UTEST_EXEC_ASSERT_(cfilt_ukf_alloc, &filt, 2, 3, 3, some_function, some_function, gen);
+    UTEST_EXEC_ASSERT_(cfilt_ukf_alloc, &filt, 0, 3, 3, some_function,
+                       some_function, gen);
+    UTEST_EXEC_ASSERT_(cfilt_ukf_alloc, &filt, 3, 3, 3, NULL, some_function,
+                       gen);
+    UTEST_EXEC_ASSERT_(cfilt_ukf_alloc, &filt, 2, 3, 3, some_function,
+                       some_function, gen);
     gsl_set_error_handler(hdl);
 
-    UTEST_EXEC_ASSERT(cfilt_ukf_alloc, &filt, 3, 3, 3, some_function, some_function, gen);
+    UTEST_EXEC_ASSERT(cfilt_ukf_alloc, &filt, 3, 3, 3, some_function,
+                      some_function, gen);
     cfilt_ukf_free(&filt);
     cfilt_sigma_generator_free(gen);
 

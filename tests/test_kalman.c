@@ -26,7 +26,7 @@ int
 test_kalman_filter_alloc(void)
 {
     cfilt_kalman_filter filt;
-    
+
     gsl_error_handler_t* hdl = gsl_set_error_handler_off();
     UTEST_EXEC_ASSERT_(cfilt_kalman_filter_alloc, &filt, 0, 3, 3);
     gsl_set_error_handler(hdl);
@@ -37,7 +37,8 @@ test_kalman_filter_alloc(void)
     return GSL_SUCCESS;
 }
 
-int test_kalman_filter_predict(void)
+int
+test_kalman_filter_predict(void)
 {
     cfilt_kalman_filter filt;
     UTEST_EXEC_ASSERT(cfilt_kalman_filter_alloc, &filt, 3, 3, 3);
@@ -53,7 +54,8 @@ int test_kalman_filter_predict(void)
     return GSL_SUCCESS;
 }
 
-int test_kalman_filter_update(void)
+int
+test_kalman_filter_update(void)
 {
     cfilt_kalman_filter filt;
     UTEST_EXEC_ASSERT(cfilt_kalman_filter_alloc, &filt, 3, 3, 3);
