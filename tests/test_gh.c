@@ -42,7 +42,7 @@ int
 test_cfilt_gh_predict(void)
 {
     // As for all filters, we do not test values. They are way
-    // too hard to track so we leave that to tests. Correctness
+    // too hard to track so we leave that to examples. Correctness
     // will be asserted with the code just not crashing because
     // of segfaults and whatnot. This comment will not be repeated
     // and so I assume whoever cares enough to read my tests, they

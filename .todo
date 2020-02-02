@@ -1,9 +1,9 @@
-1. Add util tests
-2. Store test source and results in a directory
-3. Defensive programming when possible (with GSL_ERROR when applicable)
+(DONE) 1. Add util tests
+(DONE) 2. Store test source and results in a directory
+(DONE) 3. Defensive programming when possible (with GSL_ERROR when applicable)
 4. Better reliability tests
 5. Interesting mathematical edge cases tests
-    6. Finish ukf and move sigma point average and variance computation to sigma module
-7. Documentation when necessary (ukf possibly)
+(DONE) 6. Finish ukf and move sigma point average and variance computation to sigma module
+7. Documentation with comments in each module
 8. Review according to GSL coding guidelines
 9. ADD SOURCES
