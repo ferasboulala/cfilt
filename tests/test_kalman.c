@@ -23,7 +23,7 @@
 #include <gsl/gsl_errno.h>
 
 int
-test_kalman_filter_alloc(void)
+test_cfilt_kalman_filter_alloc(void)
 {
     cfilt_kalman_filter filt;
 
@@ -38,7 +38,7 @@ test_kalman_filter_alloc(void)
 }
 
 int
-test_kalman_filter_predict(void)
+test_cfilt_kalman_filter_predict(void)
 {
     cfilt_kalman_filter filt;
     UTEST_EXEC_ASSERT(cfilt_kalman_filter_alloc, &filt, 3, 3, 3);
@@ -55,7 +55,7 @@ test_kalman_filter_predict(void)
 }
 
 int
-test_kalman_filter_update(void)
+test_cfilt_kalman_filter_update(void)
 {
     cfilt_kalman_filter filt;
     UTEST_EXEC_ASSERT(cfilt_kalman_filter_alloc, &filt, 3, 3, 3);
@@ -82,9 +82,9 @@ test_kalman_filter_update(void)
 int
 main(void)
 {
-    RUN_TEST(test_kalman_filter_alloc);
-    RUN_TEST(test_kalman_filter_predict);
-    RUN_TEST(test_kalman_filter_update);
+    RUN_TEST(test_cfilt_kalman_filter_alloc);
+    RUN_TEST(test_cfilt_kalman_filter_predict);
+    RUN_TEST(test_cfilt_kalman_filter_update);
 
     return GSL_SUCCESS;
 }

@@ -69,9 +69,10 @@ cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k,
     M_ALLOC_ASSERT_(filt->P_, n, n);
     M_ALLOC_ASSERT_(filt->Y, filt->gen->points->size1, n);
     M_ALLOC_ASSERT_(filt->Q, n, n);
-    M_ALLOC_ASSERT_(filt->_Y_x, n, 1);
+    M_ALLOC_ASSERT_(filt->_Y_x, 1, n);
 
     // update step
+    V_ALLOC_ASSERT_(filt->z, k);
     V_ALLOC_ASSERT_(filt->x, n);
     V_ALLOC_ASSERT_(filt->u_z, k);
     V_ALLOC_ASSERT_(filt->y, k);
@@ -82,9 +83,10 @@ cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k,
     M_ALLOC_ASSERT_(filt->K, n, k);
     M_ALLOC_ASSERT_(filt->Z, filt->gen->points->size1, k);
     M_ALLOC_ASSERT_(filt->_P_z_inv, k, k);
-    M_ALLOC_ASSERT_(filt->_Z_u, k, 1);
+    M_ALLOC_ASSERT_(filt->_Z_u, 1, k);
     M_ALLOC_ASSERT_(filt->_P_z_inv, n, k);
     M_ALLOC_ASSERT_(filt->_Y_x_Z_u, n, k);
+    M_ALLOC_ASSERT_(filt->_K_P_z, n, k);
 
     filt->_perm = gsl_permutation_alloc(k);
     if (filt->_perm == NULL)
@@ -103,6 +105,7 @@ cfilt_ukf_free(cfilt_ukf* filt)
     V_FREE_IF_NOT_NULL(filt->x);
     V_FREE_IF_NOT_NULL(filt->u_z);
     V_FREE_IF_NOT_NULL(filt->y);
+    V_FREE_IF_NOT_NULL(filt->z);
 
     M_FREE_IF_NOT_NULL(filt->P_);
     M_FREE_IF_NOT_NULL(filt->Y);
@@ -153,7 +156,7 @@ cfilt_ukf_predict(cfilt_ukf* filt, void* ptr)
         EXEC_ASSERT(gsl_vector_memcpy, dst, filt->x_);
         EXEC_ASSERT(gsl_vector_sub, dst, point);
         EXEC_ASSERT(gsl_vector_scale, dst, -1);
-        EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasTrans, weight,
+        EXEC_ASSERT(gsl_blas_dgemm, CblasTrans, CblasNoTrans, weight,
                     filt->_Y_x, filt->_Y_x, 1, filt->P_);
     }
 
@@ -195,7 +198,7 @@ cfilt_ukf_update(cfilt_ukf* filt, void* ptr)
         EXEC_ASSERT(gsl_vector_memcpy, dst, filt->u_z);
         EXEC_ASSERT(gsl_vector_sub, dst, point);
         EXEC_ASSERT(gsl_vector_scale, dst, -1);
-        EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasTrans, weight,
+        EXEC_ASSERT(gsl_blas_dgemm, CblasTrans, CblasNoTrans, weight,
                     filt->_Z_u, filt->_Z_u, 1.0, filt->P_z);
     }
 
@@ -224,7 +227,7 @@ cfilt_ukf_update(cfilt_ukf* filt, void* ptr)
         EXEC_ASSERT(gsl_vector_scale, dst_z, -1);
         EXEC_ASSERT(gsl_vector_scale, dst_y, -1);
 
-        EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasTrans, weight,
+        EXEC_ASSERT(gsl_blas_dgemm, CblasTrans, CblasNoTrans, weight,
                     filt->_Y_x, filt->_Z_u, 1.0, filt->_Y_x_Z_u);
     }
 

@@ -29,7 +29,10 @@
 
 #define FREE_IF_NOT_NULL(p, func)                                              \
     if (p)                                                                     \
-        func(p);
+    {                                                                          \
+        func(p);                                                               \
+        p = NULL;                                                              \
+    }
 #define V_FREE_IF_NOT_NULL(v) FREE_IF_NOT_NULL(v, gsl_vector_free)
 #define M_FREE_IF_NOT_NULL(m) FREE_IF_NOT_NULL(m, gsl_matrix_free)
 

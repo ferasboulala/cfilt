@@ -26,14 +26,13 @@
 #define __unused__ __attribute__((unused))
 
 int
-some_function(__unused__ cfilt_ukf* filt, __unused__ void* ptr)
+no_op_func(__unused__ cfilt_ukf* filt, __unused__ void* ptr)
 {
-    // Dummy function for the allocation unit test
     return GSL_SUCCESS;
 }
 
 int
-test_ukf_alloc(void)
+test_cfilt_ukf_alloc(void)
 {
     cfilt_ukf filt;
     cfilt_sigma_generator* gen;
@@ -41,16 +40,66 @@ test_ukf_alloc(void)
                       &gen, 3, 0.5, 2.0, 1.0);
 
     gsl_error_handler_t* hdl = gsl_set_error_handler_off();
-    UTEST_EXEC_ASSERT_(cfilt_ukf_alloc, &filt, 0, 3, 3, some_function,
-                       some_function, gen);
-    UTEST_EXEC_ASSERT_(cfilt_ukf_alloc, &filt, 3, 3, 3, NULL, some_function,
+    UTEST_EXEC_ASSERT_(cfilt_ukf_alloc, &filt, 0, 3, 3, no_op_func, no_op_func,
                        gen);
-    UTEST_EXEC_ASSERT_(cfilt_ukf_alloc, &filt, 2, 3, 3, some_function,
-                       some_function, gen);
+    UTEST_EXEC_ASSERT_(cfilt_ukf_alloc, &filt, 3, 3, 3, NULL, no_op_func, gen);
+    UTEST_EXEC_ASSERT_(cfilt_ukf_alloc, &filt, 2, 3, 3, no_op_func, no_op_func,
+                       gen);
     gsl_set_error_handler(hdl);
 
-    UTEST_EXEC_ASSERT(cfilt_ukf_alloc, &filt, 3, 3, 3, some_function,
-                      some_function, gen);
+    UTEST_EXEC_ASSERT(cfilt_ukf_alloc, &filt, 3, 3, 3, no_op_func, no_op_func,
+                      gen);
+    cfilt_ukf_free(&filt);
+    cfilt_sigma_generator_free(gen);
+
+    return GSL_SUCCESS;
+}
+
+int
+test_cfilt_ukf_predict(void)
+{
+    cfilt_ukf filt;
+    cfilt_sigma_generator* gen;
+    UTEST_EXEC_ASSERT(cfilt_sigma_generator_alloc, CFILT_SIGMA_VAN_DER_MERWE,
+                      &gen, 3, 0.5, 2.0, 1.0);
+    UTEST_EXEC_ASSERT(cfilt_ukf_alloc, &filt, 3, 3, 3, no_op_func, no_op_func,
+                      gen);
+
+    // The only matrix that must be set for the sigma generator callback
+    gsl_matrix_set_identity(filt.P);
+
+    UTEST_EXEC_ASSERT(cfilt_ukf_predict, &filt, NULL);
+    UTEST_EXEC_ASSERT(cfilt_ukf_predict, &filt, NULL);
+    UTEST_EXEC_ASSERT(cfilt_ukf_predict, &filt, NULL);
+
+    cfilt_ukf_free(&filt);
+    cfilt_sigma_generator_free(gen);
+
+    return GSL_SUCCESS;
+}
+
+int
+test_cfilt_ukf_update(void)
+{
+    cfilt_ukf filt;
+    cfilt_sigma_generator* gen;
+    UTEST_EXEC_ASSERT(cfilt_sigma_generator_alloc, CFILT_SIGMA_VAN_DER_MERWE,
+                      &gen, 3, 0.5, 2.0, 1.0);
+    UTEST_EXEC_ASSERT(cfilt_ukf_alloc, &filt, 3, 3, 3, no_op_func, no_op_func,
+                      gen);
+
+    gsl_matrix_set_identity(filt.P);
+    UTEST_EXEC_ASSERT(cfilt_ukf_predict, &filt, NULL);
+    UTEST_EXEC_ASSERT(cfilt_ukf_update, &filt, NULL);
+    gsl_matrix_set_identity(filt.P);
+    UTEST_EXEC_ASSERT(cfilt_ukf_predict, &filt, NULL);
+    gsl_matrix_set_identity(filt.P);
+    UTEST_EXEC_ASSERT(cfilt_ukf_predict, &filt, NULL);
+    gsl_matrix_set_identity(filt.P);
+    UTEST_EXEC_ASSERT(cfilt_ukf_predict, &filt, NULL);
+    gsl_matrix_set_identity(filt.P);
+    UTEST_EXEC_ASSERT(cfilt_ukf_update, &filt, NULL);
+
     cfilt_ukf_free(&filt);
     cfilt_sigma_generator_free(gen);
 
@@ -60,7 +109,9 @@ test_ukf_alloc(void)
 int
 main(void)
 {
-    RUN_TEST(test_ukf_alloc);
+    RUN_TEST(test_cfilt_ukf_alloc);
+    RUN_TEST(test_cfilt_ukf_predict);
+    RUN_TEST(test_cfilt_ukf_update);
 
     return GSL_SUCCESS;
 }
