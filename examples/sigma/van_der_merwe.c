@@ -23,18 +23,31 @@
 #include <gsl/gsl_vector.h>
 
 #include <stdio.h>
+#include <sys/types.h>
 
-#define N 2
-#define ALPHA 0.5
-#define BETA 2.0
-#define KAPPA 3.0 - N
+void
+print_usage(char* prog_name)
+{
+    fprintf(stderr, "Usage : %s alpha beta kappa\n", prog_name);
+}
 
 int
 main(int argc, char** argv)
 {
+    if (argc != 4)
+    {
+        print_usage(argv[0]);
+        return -1;
+    }
+
+    const double alpha = atof(argv[1]);
+    const double beta = atof(argv[2]);
+    const double kappa = atof(argv[3]);
+    const size_t N = 2;
+
     cfilt_sigma_generator* generator;
     if (cfilt_sigma_generator_alloc(CFILT_SIGMA_VAN_DER_MERWE, &generator, N,
-                                    ALPHA, BETA, KAPPA))
+                                    alpha, beta, kappa))
     {
         fprintf(
           stderr,
@@ -44,25 +57,41 @@ main(int argc, char** argv)
 
     gsl_matrix* cov = gsl_matrix_alloc(N, N);
     gsl_matrix_set_identity(cov);
+
     gsl_vector* mu = gsl_vector_alloc(N);
-    gsl_vector_set_all(mu, 1);
+    gsl_vector_set_zero(mu);
 
     if (cfilt_sigma_generator_generate(generator, mu, cov))
     {
         fprintf(stderr, "Could not generate sigma points\n");
-        goto cleanup;
+        return -1;
     }
 
-    fprintf(stderr, "mu_weights=\n");
-    gsl_vector_fprintf(stderr, generator->mu_weights, "%f");
+    printf("points\n");
+    for (size_t i = 0; i < generator->points->size1; ++i)
+    {
+        for (size_t j = 0; j < generator->points->size2; ++j)
+        {
+            printf("%f,", gsl_matrix_get(generator->points, i, j));
+        }
 
-    fprintf(stderr, "\nsigma_weights=\n");
-    gsl_vector_fprintf(stderr, generator->sigma_weights, "%f");
+        printf("\n");
+    }
 
-    fprintf(stderr, "\npoints=\n");
-    gsl_matrix_fprintf(stderr, generator->points, "%f");
+    printf("mu_weights\n");
+    for (size_t i = 0; i < generator->mu_weights->size; ++i)
+    {
+        printf("%f,", gsl_vector_get(generator->mu_weights, i));
+    }
 
-cleanup:
+    printf("\nsigma_weights\n");
+
+    for (size_t i = 0; i < generator->sigma_weights->size; ++i)
+    {
+        printf("%f,", gsl_vector_get(generator->sigma_weights, i));
+    }
+    printf("\n");
+
     cfilt_sigma_generator_free(generator);
     gsl_matrix_free(cov);
     gsl_vector_free(mu);

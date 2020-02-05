@@ -33,7 +33,7 @@ test_discrete_white_noise(void)
     static const double stddev = 1.0;
 
     gsl_matrix* Q = gsl_matrix_alloc(2, 2);
-    gsl_matrix* tau = gsl_matrix_alloc(2, 1);
+    gsl_vector* tau = gsl_vector_alloc(2);
     gsl_matrix* expected_result_matrix = gsl_matrix_alloc(2, 2);
 
     gsl_matrix_set(expected_result_matrix, 0, 0, pow(DT, 4) * 0.25);
@@ -41,8 +41,8 @@ test_discrete_white_noise(void)
     gsl_matrix_set(expected_result_matrix, 1, 0, pow(DT, 3) * 0.50);
     gsl_matrix_set(expected_result_matrix, 1, 1, pow(DT, 2));
 
-    gsl_matrix_set(tau, 0, 0, 0.5 * DT * DT);
-    gsl_matrix_set(tau, 1, 0, DT);
+    gsl_vector_set(tau, 0, 0.5 * DT * DT);
+    gsl_vector_set(tau, 1, DT);
 
     UTEST_EXEC_ASSERT(cfilt_discrete_white_noise, tau, stddev, Q);
     // FIXME : Add tolerance

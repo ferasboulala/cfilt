@@ -17,33 +17,37 @@
  * along with cfilt. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CFILT_H_
-#define CFILT_H_
+#include "cfilt/cfilt.h"
 
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <stdio.h>
 
-typedef struct
+int
+main(void)
 {
-    double mean;
-    double var;
-} cfilt_gauss;
+    double x[] = { 1.0, 2.0, 3.0 };
+    const int N = sizeof(x) / sizeof(double);
 
-int cfilt_discrete_white_noise(gsl_vector* tau, const double sigma,
-                               gsl_matrix* Q);
+    gsl_vector_view x_view = gsl_vector_view_array(x, N);
+    gsl_vector* x_vec = &x_view.vector;
 
-int cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov,
-                      double* res);
+    gsl_matrix* cov = gsl_matrix_alloc(N, N);
+    gsl_matrix_set_identity(cov);
+    gsl_matrix_scale(cov, 2.0);
 
-int cfilt_norm_estimated_error_squared(gsl_vector* x_, gsl_matrix* cov,
-                                       double* res);
+    double nees;
 
-#ifdef __cplusplus
+    if (cfilt_norm_estimated_error_squared(x_vec, cov, &nees))
+    {
+        fprintf(stderr, "An error occured while computing the NEES\n");
+        return -1;
+    }
+
+    printf("The NEES is %f\n", nees);
+
+    gsl_matrix_free(cov);
+
+    return 0;
 }
-#endif
-
-#endif // CFILT_H_

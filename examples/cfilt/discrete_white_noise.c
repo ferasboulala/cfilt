@@ -17,33 +17,38 @@
  * along with cfilt. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef CFILT_H_
-#define CFILT_H_
+#include "cfilt/cfilt.h"
 
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <math.h>
+#include <stdio.h>
 
-typedef struct
+#define DT 0.1
+
+int
+main(void)
 {
-    double mean;
-    double var;
-} cfilt_gauss;
+    double tau[] = { 0.5 * pow(DT, 2), DT };
+    const int N = sizeof(tau) / sizeof(double);
 
-int cfilt_discrete_white_noise(gsl_vector* tau, const double sigma,
-                               gsl_matrix* Q);
+    gsl_vector_view tau_view = gsl_vector_view_array(tau, N);
+    gsl_vector* tau_vec = &tau_view.vector;
 
-int cfilt_mahalanobis(gsl_vector* x, gsl_vector* mu, gsl_matrix* cov,
-                      double* res);
+    gsl_matrix* Q = gsl_matrix_alloc(N, N);
+    double variance = 1.0;
 
-int cfilt_norm_estimated_error_squared(gsl_vector* x_, gsl_matrix* cov,
-                                       double* res);
+    if (cfilt_discrete_white_noise(tau_vec, variance, Q) != GSL_SUCCESS)
+    {
+        fprintf(stderr, "An error occured while computing the discrete white "
+                        "noise covariance matrix\n");
+        return -1;
+    }
 
-#ifdef __cplusplus
+    gsl_matrix_fprintf(stdout, Q, "%f");
+
+    gsl_matrix_free(Q);
+
+    return 0;
 }
-#endif
-
-#endif // CFILT_H_

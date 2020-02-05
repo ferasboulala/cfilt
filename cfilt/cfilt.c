@@ -30,9 +30,13 @@
 #include <string.h>
 
 int
-cfilt_discrete_white_noise(gsl_matrix* tau, const double sigma, gsl_matrix* Q)
+cfilt_discrete_white_noise(gsl_vector* tau, const double sigma, gsl_matrix* Q)
 {
-    EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasTrans, 1.0, tau, tau, 0, Q);
+    gsl_matrix_view tau_view = gsl_matrix_view_array(tau->data, tau->size, 1);
+    gsl_matrix* tau_mat = &tau_view.matrix;
+
+    EXEC_ASSERT(gsl_blas_dgemm, CblasNoTrans, CblasTrans, 1.0, tau_mat, tau_mat,
+                0, Q);
     gsl_matrix_scale(Q, sigma);
 
     return GSL_SUCCESS;
