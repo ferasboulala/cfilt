@@ -133,3 +133,46 @@ cfilt_vector_cmp_tol(const gsl_vector* a, const gsl_vector* b, const double tol)
 
     return GSL_SUCCESS;
 }
+
+void
+cfilt_fprintf_matrix_rows(FILE* file, const gsl_matrix *mat)
+{
+    if (mat->size1 * mat->size2 == 0)
+    {
+        return;
+    }
+
+    for (size_t i = 0; i < mat->size1; ++i)
+    {
+        gsl_vector_const_view view = gsl_matrix_const_row(mat, i);
+        cfilt_fprintf_vector_row(file, &view.vector);
+    }
+}
+
+void
+cfilt_fprintf_vector_row(FILE* file, const gsl_vector *vec)
+{
+    if (vec->size == 0)
+    {
+        return;
+    }
+
+    for (size_t i = 0; i < vec->size - 1; ++i)
+    {
+        fprintf(file, "%f,", gsl_vector_get(vec, i));
+    }
+
+    fprintf(file, "%f\n", gsl_vector_get(vec, vec->size-1));
+}
+
+void
+cfilt_printf_matrix_rows(const gsl_matrix *mat)
+{
+    cfilt_fprintf_matrix_rows(stdout, mat);
+}
+
+void
+cfilt_printf_vector_row(const gsl_vector *vec)
+{
+    cfilt_fprintf_vector_row(stdout, vec);
+}

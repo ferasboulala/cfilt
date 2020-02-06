@@ -18,6 +18,7 @@
  */
 
 #include "cfilt/sigma.h"
+#include "cfilt/util.h"
 
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
@@ -68,29 +69,19 @@ main(int argc, char** argv)
     }
 
     printf("points\n");
-    for (size_t i = 0; i < generator->points->size1; ++i)
-    {
-        for (size_t j = 0; j < generator->points->size2; ++j)
-        {
-            printf("%f,", gsl_matrix_get(generator->points, i, j));
-        }
-
-        printf("\n");
-    }
+    cfilt_printf_matrix_rows(generator->points);
 
     printf("mu_weights\n");
-    for (size_t i = 0; i < generator->mu_weights->size; ++i)
-    {
-        printf("%f,", gsl_vector_get(generator->mu_weights, i));
-    }
+    cfilt_printf_vector_row(generator->mu_weights);
 
-    printf("\nsigma_weights\n");
+    printf("sigma_weights\n");
+    cfilt_printf_vector_row(generator->sigma_weights);
 
-    for (size_t i = 0; i < generator->sigma_weights->size; ++i)
-    {
-        printf("%f,", gsl_vector_get(generator->sigma_weights, i));
-    }
-    printf("\n");
+    printf("mu\n");
+    cfilt_printf_vector_row(mu);
+
+    printf("cov\n");
+    cfilt_printf_matrix_rows(cov);
 
     cfilt_sigma_generator_free(generator);
     gsl_matrix_free(cov);

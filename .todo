@@ -7,3 +7,5 @@
 7. Documentation with comments in each module
 8. Review according to GSL coding guidelines
 9. ADD SOURCES
+10. blogpost
+11. Check how one can install this package unto their system with cmake and make install
