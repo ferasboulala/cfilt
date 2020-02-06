@@ -86,12 +86,12 @@ int cfilt_vector_cmp(const gsl_vector* a, const gsl_vector* b);
 int cfilt_vector_cmp_tol(const gsl_vector* a, const gsl_vector* b,
                          const double tol);
 
-void cfilt_fprintf_matrix_rows(FILE* file, const gsl_matrix *mat);
+void cfilt_fprintf_matrix_rows(FILE* file, const gsl_matrix* mat);
 
-void cfilt_fprintf_vector_row(FILE* file, const gsl_vector *vec);
+void cfilt_fprintf_vector_row(FILE* file, const gsl_vector* vec);
 
-void cfilt_printf_matrix_rows(const gsl_matrix *mat);
+void cfilt_printf_matrix_rows(const gsl_matrix* mat);
 
-void cfilt_printf_vector_row(const gsl_vector *vec);
+void cfilt_printf_vector_row(const gsl_vector* vec);
 
 #endif // CFILT_UTIL_H_
