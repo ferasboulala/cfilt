@@ -80,7 +80,7 @@ cfilt_sigma_generator_van_der_merwe_alloc(
     V_ALLOC_ASSERT_VDM(vdm._common.mu_weights, VDM(n));
     V_ALLOC_ASSERT_VDM(vdm._common.sigma_weights, VDM(n));
 
-    const double weight = 1.0 / 2.0 / (n + vdm.lambda);
+    const double weight = 1.0 / (2.0 * (n + vdm.lambda));
     gsl_vector_set_all(vdm._common.mu_weights, weight);
     gsl_vector_set_all(vdm._common.sigma_weights, weight);
 

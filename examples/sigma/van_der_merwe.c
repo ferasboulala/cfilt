@@ -58,6 +58,9 @@ main(int argc, char** argv)
 
     gsl_matrix* cov = gsl_matrix_alloc(N, N);
     gsl_matrix_set_identity(cov);
+    gsl_matrix_scale(cov, 3.0);
+    gsl_matrix_set(cov, 0, 1, 1.0);
+    gsl_matrix_set(cov, 1, 0, 1.0);
 
     gsl_vector* mu = gsl_vector_alloc(N);
     gsl_vector_set_zero(mu);
