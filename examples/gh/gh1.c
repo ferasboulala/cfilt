@@ -52,10 +52,9 @@ main(int argc, char** argv)
 {
     if (argc != 11)
     {
-        fprintf(
-          stderr,
-          "Usage : %s N_STEPS DT X_NOISE_MAG V_NOISE_MAG X0 V0 A0 GH0 GH1 GH2\n",
-          argv[0]);
+        fprintf(stderr, "Usage : %s N_STEPS DT X_NOISE_MAG V_NOISE_MAG X0 V0 "
+                        "A0 GH0 GH1 GH2\n",
+                argv[0]);
         return -1;
     }
 
@@ -113,19 +112,8 @@ main(int argc, char** argv)
         position += velocity * DT;
         velocity += acceleration * DT;
 
-        printf("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
-                position,
-                velocity,
-                acceleration,
-                x_pred,
-                v_pred,
-                a_pred,
-                z_x,
-                z_v,
-                x_,
-                v_,
-                a_
-        );
+        printf("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", position, velocity,
+               acceleration, x_pred, v_pred, a_pred, z_x, z_v, x_, v_, a_);
     }
 
     cfilt_gh_free(&filter);
