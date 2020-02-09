@@ -34,7 +34,7 @@ def csv_line_to_np_array(line):
     """ Converts comma separated floating values to a numpy array. """
     return np.array(csv_line_to_list(line))
 
-def generate_ellipse_2D(ax, mean, cov, n_std=1):
+def generate_ellipse_2D(ax, mean, cov, n_std=1, **kwargs):
     """ Returns an ellipse object given a mean, a covariance and the number of stddev. """
     pearson = cov[0, 1] / np.sqrt(cov[0, 0] * cov[1, 1])
     ell_radius_x = np.sqrt(1 + pearson)
@@ -43,9 +43,9 @@ def generate_ellipse_2D(ax, mean, cov, n_std=1):
             (0, 0),
             width=ell_radius_x * 2,
             height=ell_radius_y * 2,
-            facecolor='green',
-            edgecolor='green',
             alpha=0.2,
+            facecolor='none',
+            **kwargs,
     )
 
     scale_x = np.sqrt(cov[0, 0]) * n_std
@@ -101,7 +101,11 @@ def extract_results_van_der_merwe(generator):
 
 def plot_result_van_der_merwe(ax, X, Y, mu_weights, sigma_weights, mu, cov, alpha, beta, kappa):
     """ Plots the results of the Van Der Merwe example program. """
-    ellipse = generate_ellipse_2D(ax, mu, cov, 1)
+    ellipse = generate_ellipse_2D(ax, mu, cov, 1, edgecolor='firebrick')
+    ax.add_patch(ellipse)
+    ellipse = generate_ellipse_2D(ax, mu, cov, 2, edgecolor='fuchsia')
+    ax.add_patch(ellipse)
+    ellipse = generate_ellipse_2D(ax, mu, cov, 3, edgecolor='blue')
     ax.add_patch(ellipse)
 
     scale = np.abs(mu_weights) / np.max(np.abs(mu_weights)) * 500
@@ -127,6 +131,7 @@ def van_der_merwe():
     parameters = [
             (0.3, 2, 3),
             (1.0, 2, 3),
+            (0.5, 2, -1),
     ]
     results = []
     for param in parameters:
@@ -138,7 +143,7 @@ def van_der_merwe():
 
     plot_results_van_der_merwe(results, parameters)
 
-def plot_result_gh1(ax, df, *params):
+def plot_result_constant_accel(ax, df, *params):
     x = df['x']
     v = df['v']
     a = df['a']
@@ -173,16 +178,16 @@ def plot_result_gh1(ax, df, *params):
     a_ax.plot(a_)
     a_ax.legend(['a', 'a_pred', 'a_'])
 
-def plot_results_gh1(results, parameters):
+def plot_results_constant_accel(results, parameters):
     assert len(results) == len(parameters)
 
     fig, axes = plt.subplots(len(results), 3)
     for ax, result, params in zip(axes, results, parameters):
-        plot_result_gh1(ax, result, *params)
+        plot_result_constant_accel(ax, result, *params)
 
     plt.show()
 
-def gh1():
+def constant_accel():
     """ GH filter Example Program main function. """
     'N_STEPS DT X_NOISE_MAG V_NOISE_MAG X0 V0 A0 GH0 GH1 GH2'
     parameters = [
@@ -194,10 +199,10 @@ def gh1():
     results = []
     for param in parameters:
         str_params = stringify(param)
-        result = get_program_output_df('gh1', *str_params)
+        result = get_program_output_df('constant_accel', *str_params)
         results.append(result)
 
-    plot_results_gh1(results, parameters)
+    plot_results_constant_accel(results, parameters)
 
 def main():
     if len(sys.argv) != 2:
@@ -208,8 +213,8 @@ def main():
     print(program)
     if program == "van_der_merwe":
         van_der_merwe()
-    elif program == "gh1":
-        gh1()
+    elif program == "constant_accel":
+        constant_accel()
     else:
         print("Unknown program")
         sys.exit(1)
