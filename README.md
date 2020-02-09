@@ -1,5 +1,5 @@
 # cfilt
-Statistical filters implemented in C.
+Statistical filters implemented in C. Code examples can be found in the `examples` directory along with pretty figures of the output results.
 
 ## References
 1. Kalman and Bayesian Filters in Python, Roger R Labbe Jr, May 2018
