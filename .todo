@@ -9,3 +9,5 @@
 9. ADD SOURCES
 10. blogpost
 11. Check how one can install this package unto their system with cmake and make install
+12. Remove redundant includes
+13. Check gsl customization for performance or safety

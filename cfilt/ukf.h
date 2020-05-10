@@ -37,7 +37,10 @@ typedef struct cfilt_ukf cfilt_ukf;
 
 struct cfilt_ukf
 {
-    size_t _p;
+    // FIXME : Remove it
+    // size_t _p;
+
+    int allocated_once;
 
     gsl_vector* x_;
     gsl_vector* x;
@@ -62,15 +65,20 @@ struct cfilt_ukf
 
     gsl_permutation* _perm;
 
+    cfilt_sigma_generator* gen;
+
     int (*F)(cfilt_ukf* filt, void* ptr);
     int (*H)(cfilt_ukf* filt, void* ptr);
 
-    cfilt_sigma_generator* gen;
+    int (*X_MEAN)(cfilt_ukf*, void* ptr);
+    int (*Z_MEAN)(cfilt_ukf*, void* ptr);
 };
 
 int cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m,
                     const size_t k, int (*F)(cfilt_ukf*, void*),
                     int (*H)(cfilt_ukf*, void*), cfilt_sigma_generator* gen);
+
+int cfilt_ukf_realloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k, cfilt_sigma_generator* gen, const int keep_values);
 
 void cfilt_ukf_free(cfilt_ukf* filt);
 

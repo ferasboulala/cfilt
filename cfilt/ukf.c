@@ -22,20 +22,17 @@
 #include "cfilt/util.h"
 
 #include <gsl/gsl_blas.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_permutation.h>
-#include <gsl/gsl_vector.h>
 
 #include <string.h>
-#include <sys/types.h>
 
 #define V_ALLOC_ASSERT_(p, n) V_ALLOC_ASSERT(p, n, cfilt_ukf_free, filt)
 #define M_ALLOC_ASSERT_(p, n, m) M_ALLOC_ASSERT(p, n, m, cfilt_ukf_free, filt)
 
+// alloc calls realloc
+// realloc must allocate, make sure that sizes are consistent and, if asked, copy old data
+
 int
-cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k,
-                int (*F)(cfilt_ukf*, void*), int (*H)(cfilt_ukf*, void*),
-                cfilt_sigma_generator* gen)
+cfilt_ukf_sanity_check(const size_t n, const size_t m, const size_t k, cfilt_sigma_generator *gen)
 {
     if (n * m * k == 0 || n == 1)
     {
@@ -50,19 +47,79 @@ cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k,
                   GSL_EINVAL);
     }
 
-    if (gen->points->size2 != n)
+    if (gen == NULL || gen->points->size2 != n)
     {
         GSL_ERROR(
-          "Sigma generator dimensionality does not match filter's dimensions",
+          "Sigma generator dimensionality does not match filter's dimensions or NULL was given",
           GSL_EINVAL);
     }
 
+    return GSL_SUCCESS;
+}
+
+int
+cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k,
+                int (*F)(cfilt_ukf*, void*), int (*H)(cfilt_ukf*, void*), int (*X_MEAN)(cfilt_ukf*, void*),
+                int (*Z_MEAN)(cfilt_ukf*, void*),
+                cfilt_sigma_generator* gen)
+{
     memset(filt, 0, sizeof(cfilt_ukf));
+
+    EXEC_ASSERT(cfilt_ukf_realloc, filt, n, m, k, gen, 0);
 
     filt->F = F;
     filt->H = H;
+
+    filt->X_MEAN = X_MEAN;
+    filt->Z_MEAN = Z_MEAN;
+
+    return GSL_SUCCESS;
+}
+
+int
+cfilt_ukf_matrix_realloc(cfilt_ukf* filt, gsl_matrix** a, const size_t n, const size_t m, const int keep_values, const int first_time)
+{
+    if (first_time)
+    {
+        M_ALLOC_ASSERT_(*a, n, m);
+        return GSL_SUCCESS;
+    }
+
+    if (cfilt_matrix_realloc(a, n, m, keep_values))
+    {
+        cfilt_ukf_free(filt);
+        return GSL_ENOMEM;
+    }
+
+    return GSL_SUCCESS;
+}
+
+int
+cfilt_ukf_vector_realloc(cfilt_ukf* filt, gsl_vector** v, const size_t n, const int keep_values, const int first_time)
+{
+    if (first_time)
+    {
+        V_ALLOC_ASSERT_(*v, n);
+        return GSL_SUCCESS;
+    }
+
+    if (cfilt_vector_realloc(v, n, keep_values))
+    {
+        cfilt_ukf_free(filt);
+        return GSL_ENOMEM;
+    }
+
+    return GSL_SUCCESS;
+}
+
+int
+cfilt_ukf_realloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k, cfilt_sigma_generator* gen, const int keep_values)
+{
+    EXEC_ASSERT(cfilt_ukf_sanity_check, n, m, t, gen);
+
     filt->gen = gen;
 
+    // TODO : Replace these macros with calls to cfilt_ukf_(vector|matrix)_realloc
     // predict step
     V_ALLOC_ASSERT_(filt->x_, n);
 
@@ -132,6 +189,7 @@ cfilt_ukf_predict(cfilt_ukf* filt, void* ptr)
     EXEC_ASSERT(filt->F, filt, ptr);
 
     // x_ = sum_i [mu_weight * Y_i]
+    // TODO : This bit of code could be generalized with a function call
     gsl_vector_set_zero(filt->x_);
     for (size_t i = 0; i < filt->gen->points->size1; ++i)
     {
@@ -170,6 +228,7 @@ cfilt_ukf_update(cfilt_ukf* filt, void* ptr)
     EXEC_ASSERT(filt->H, filt, ptr);
 
     // u_z = sum_i [mu_weight * Z_i]
+    // TODO : This bit of code could be generalized with a function call
     gsl_vector_set_zero(filt->u_z);
     for (size_t i = 0; i < filt->gen->points->size1; ++i)
     {
@@ -181,6 +240,7 @@ cfilt_ukf_update(cfilt_ukf* filt, void* ptr)
     }
 
     // y = z - u_z
+    // TODO : This bit of code could be generalized with a function call
     EXEC_ASSERT(gsl_vector_memcpy, filt->y, filt->z);
     EXEC_ASSERT(gsl_vector_sub, filt->y, filt->u_z);
 
@@ -236,6 +296,7 @@ cfilt_ukf_update(cfilt_ukf* filt, void* ptr)
                 filt->_P_z_inv, 0.0, filt->K);
 
     // x = x_ + Ky
+    // TODO : This bit of code could be generalized with a function call
     EXEC_ASSERT(gsl_vector_memcpy, filt->x, filt->x_);
     EXEC_ASSERT(gsl_blas_dgemv, CblasNoTrans, 1.0, filt->K, filt->y, 1.0,
                 filt->x);

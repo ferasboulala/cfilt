@@ -23,16 +23,12 @@
 
 #include <sys/types.h>
 
-#include <gsl/gsl_errno.h>
 #include <gsl/gsl_linalg.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_permutation.h>
-#include <gsl/gsl_vector.h>
 
 /**
  * Some of the functions in this module could be optimized. The choice of
  * implementation
- * is not entirely arbitrary. I opted for simplicity and readability.
+ * is not entirely arbitrary. I opted for simplicity, maintainability and readability.
  *
  * These functions are not meant to be used outside of cfilt modules and most
  * of them are used in unit testing anyway (comparison functions for instance).
@@ -107,6 +103,47 @@ cfilt_matrix_cmp_tol(const gsl_matrix* a, const gsl_matrix* b, const double tol)
 }
 
 int
+cfilt_matrix_var_memcpy(gsl_matrix* src, gsl_matrix* dst)
+{
+    const size_t n = min(src->size1, dst->size1);
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        gsl_vector_view src_view = gsl_matrix_row(src, i);
+        gsl_vector_view dst_view = gsl_matrix_row(dst, i);
+        EXEC_ASSERT(cfilt_vector_var_memcpy, src, dst);
+    }
+
+    return GSL_SUCCESS;
+}
+
+int
+cfilt_matrix_realloc(gsl_matrix** a, const size_t n, const size_t m, const int keep_values)
+{
+    gsl_matrix* a_ = *a;
+    if (a_->size1 == n && a_->size2 == m)
+    {
+        return GSL_SUCCESS;
+    }
+
+    gsl_matrix* b = gsl_matrix_alloc(n, m);
+    if (b == NULL)
+    {
+        return GSL_ENOMEM;
+    }
+
+    if (keep_values)
+    {
+        EXEC_ASSERT(gsl_matrix_memcpy, a_, b);
+    }
+
+    gsl_matrix_free(a_);
+    *a = b;
+
+    return GSL_SUCCESS;
+}
+
+int
 cfilt_vector_cmp(const gsl_vector* a, const gsl_vector* b)
 {
     return cfilt_vector_cmp_tol(a, b, 0.0);
@@ -130,6 +167,46 @@ cfilt_vector_cmp_tol(const gsl_vector* a, const gsl_vector* b, const double tol)
             return GSL_EFAILED;
         }
     }
+
+    return GSL_SUCCESS;
+}
+
+int
+cfilt_vector_var_memcpy(gsl_vector* src, gsl_vector* dst)
+{
+    const size_t n = min(src->size, dst->size);
+
+    gsl_vector_view src_view = gsl_vector_subvector(src, 0, n);
+    src = &src_view.vector;
+
+    gsl_vector_view dst_view = gsl_vector_subvector(dst, 0, n);
+    dst = &dst_view.vector;
+
+    EXEC_ASSERT(gsl_vector_memcpy, dst, src);
+}
+
+int
+cfilt_vector_realloc(gsl_vector** a, const size_t n, const int keep_values)
+{
+    gsl_vector* a_ = *a;
+    if (a_->size == n)
+    {
+        return GSL_SUCCESS;
+    }
+
+    gsl_vector* b = gsl_vector_alloc(n);
+    if (b == NULL)
+    {
+        return GSL_ENOMEM;
+    }
+
+    if (keep_values)
+    {
+        EXEC_ASSERT(cfilt_vector_var_memcpy, a_, b);
+    }
+
+    gsl_vector_free(a_);
+    *a = b;
 
     return GSL_SUCCESS;
 }

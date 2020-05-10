@@ -28,6 +28,9 @@
 #include <math.h>
 #include <stdio.h>
 
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#define max(a, b) (((a) >= (b)) ? (a) : (b))
+
 #define FREE_IF_NOT_NULL(p, func)                                              \
     if (p)                                                                     \
     {                                                                          \
@@ -81,10 +84,18 @@ int cfilt_matrix_cmp(gsl_matrix* a, gsl_matrix* b);
 int cfilt_matrix_cmp_tol(const gsl_matrix* a, const gsl_matrix* b,
                          const double tol);
 
+void cfilt_matrix_var_memcpy(gsl_matrix* src, gsl_matrix* dst);
+
+void cfilt_matrix_realloc(gsl_matrix** b, const size_t n, const size_t m, const int keep_values);
+
 int cfilt_vector_cmp(const gsl_vector* a, const gsl_vector* b);
 
 int cfilt_vector_cmp_tol(const gsl_vector* a, const gsl_vector* b,
                          const double tol);
+
+void cfilt_vector_var_memcpy(gsl_vector* src, gsl_vector* dst);
+
+void cfilt_vector_realloc(gsl_vector** a, const size_t n, const int keep_values);
 
 void cfilt_fprintf_matrix_rows(FILE* file, const gsl_matrix* mat);
 
