@@ -28,9 +28,6 @@
 #define V_ALLOC_ASSERT_(p, n) V_ALLOC_ASSERT(p, n, cfilt_ukf_free, filt)
 #define M_ALLOC_ASSERT_(p, n, m) M_ALLOC_ASSERT(p, n, m, cfilt_ukf_free, filt)
 
-// alloc calls realloc
-// realloc must allocate, make sure that sizes are consistent and, if asked, copy old data
-
 int
 cfilt_ukf_sanity_check(const size_t n, const size_t m, const size_t k, cfilt_sigma_generator *gen)
 {
@@ -60,7 +57,8 @@ cfilt_ukf_sanity_check(const size_t n, const size_t m, const size_t k, cfilt_sig
 int
 cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k,
                 int (*F)(cfilt_ukf*, void*), int (*H)(cfilt_ukf*, void*), int (*X_MEAN)(cfilt_ukf*, void*),
-                int (*Z_MEAN)(cfilt_ukf*, void*),
+                int (*Z_MEAN)(cfilt_ukf*, void*), int (*X_DIFF)(cfilt_ukf*, void*),
+                int (*Y_DIFF)(cfilt_ukf*, void*), int (*Z_DIFF)(cfilt_ukf*, void*),
                 cfilt_sigma_generator* gen)
 {
     memset(filt, 0, sizeof(cfilt_ukf));
@@ -69,17 +67,17 @@ cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t k,
 
     filt->F = F;
     filt->H = H;
-
     filt->X_MEAN = X_MEAN;
     filt->Z_MEAN = Z_MEAN;
+    filt->X_DIFF = X_DIFF;
 
     return GSL_SUCCESS;
 }
 
 int
-cfilt_ukf_matrix_realloc(cfilt_ukf* filt, gsl_matrix** a, const size_t n, const size_t m, const int keep_values, const int first_time)
+cfilt_ukf_matrix_realloc(cfilt_ukf* filt, gsl_matrix** a, const size_t n, const size_t m, const int keep_values)
 {
-    if (first_time)
+    if (!filt->allocated_once)
     {
         M_ALLOC_ASSERT_(*a, n, m);
         return GSL_SUCCESS;
@@ -95,9 +93,9 @@ cfilt_ukf_matrix_realloc(cfilt_ukf* filt, gsl_matrix** a, const size_t n, const 
 }
 
 int
-cfilt_ukf_vector_realloc(cfilt_ukf* filt, gsl_vector** v, const size_t n, const int keep_values, const int first_time)
+cfilt_ukf_vector_realloc(cfilt_ukf* filt, gsl_vector** v, const size_t n, const int keep_values)
 {
-    if (first_time)
+    if (!filt->allocated_once)
     {
         V_ALLOC_ASSERT_(*v, n);
         return GSL_SUCCESS;
@@ -119,37 +117,46 @@ cfilt_ukf_realloc(cfilt_ukf* filt, const size_t n, const size_t m, const size_t 
 
     filt->gen = gen;
 
-    // TODO : Replace these macros with calls to cfilt_ukf_(vector|matrix)_realloc
     // predict step
-    V_ALLOC_ASSERT_(filt->x_, n);
+    EXEC_ASSERT(cfilt_ukf_vector_realloc, filt, &filt->x, n, keep_values);
 
-    M_ALLOC_ASSERT_(filt->P_, n, n);
-    M_ALLOC_ASSERT_(filt->Y, filt->gen->points->size1, n);
-    M_ALLOC_ASSERT_(filt->Q, n, n);
-    M_ALLOC_ASSERT_(filt->_Y_x, 1, n);
+    EXEC_ASSERT(cfilt_ukf_matrix_realloc, filt, &filt->P_, n, n, keep_values);
+    EXEC_ASSERT(cfilt_ukf_matrix_realloc, filt, &filt->Y, gen->points->size1, n, keep_values);
+    EXEC_ASSERT(cfilt_ukf_matrix_realloc, filt, &filt->Q_, n, n, keep_values);
+    EXEC_ASSERT(cfilt_ukf_matrix_realloc, filt, &filt->_Y_x, 1, n, keep_values);
 
     // update step
-    V_ALLOC_ASSERT_(filt->z, k);
-    V_ALLOC_ASSERT_(filt->x, n);
-    V_ALLOC_ASSERT_(filt->u_z, k);
-    V_ALLOC_ASSERT_(filt->y, k);
+    EXEC_ASSERT(cfilt_ukf_vector_realloc, filt, &filt->z, k, keep_values);
+    EXEC_ASSERT(cfilt_ukf_vector_realloc, filt, &filt->x, n, keep_values);
+    EXEC_ASSERT(cfilt_ukf_vector_realloc, filt, &filt->u_z, k, keep_values);
+    EXEC_ASSERT(cfilt_ukf_vector_realloc, filt, &filt->y, k, keep_values);
 
-    M_ALLOC_ASSERT_(filt->P, n, n);
-    M_ALLOC_ASSERT_(filt->R, k, k);
-    M_ALLOC_ASSERT_(filt->P_z, k, k);
-    M_ALLOC_ASSERT_(filt->K, n, k);
-    M_ALLOC_ASSERT_(filt->Z, filt->gen->points->size1, k);
-    M_ALLOC_ASSERT_(filt->_P_z_inv, k, k);
-    M_ALLOC_ASSERT_(filt->_Z_u, 1, k);
-    M_ALLOC_ASSERT_(filt->_P_z_inv, n, k);
-    M_ALLOC_ASSERT_(filt->_Y_x_Z_u, n, k);
-    M_ALLOC_ASSERT_(filt->_K_P_z, n, k);
+    EXEC_ASSERT(cfilt_ukf_matrix_realloc, filt, filt->P, n, n, keep_values);
+    EXEC_ASSERT(cfilt_ukf_matrix_realloc, filt, filt->R, k, k, keep_values);
+    EXEC_ASSERT(cfilt_ukf_matrix_realloc, filt, filt->P_z, k, k, keep_values);
+    EXEC_ASSERT(cfilt_ukf_matrix_realloc, filt, filt->K, n, k, keep_values);
+    EXEC_ASSERT(cfilt_ukf_matrix_realloc, filt, filt->Z, gen->points->size1, k, keep_values);
+    EXEC_ASSERT(cfilt_ukf_matrix_realloc, filt, filt->_P_z_inv, n, k, keep_values);
+    EXEC_ASSERT(cfilt_ukf_matrix_realloc, filt, filt->_Z_u, 1, k, keep_values);
+    EXEC_ASSERT(cfilt_ukf_matrix_realloc, filt, filt->_Y_x_Z_u, n, k, keep_values);
+    EXEC_ASSERT(cfilt_ukf_matrix_realloc, filt, filt->_K_P_z, n, k, keep_values);
 
-    filt->_perm = gsl_permutation_alloc(k);
-    if (filt->_perm == NULL)
+    if (!filt->allocated_once)
     {
-        cfilt_ukf_free(filt);
-        return GSL_ENOMEM;
+        filt->_perm = gsl_permutation_alloc(k);
+        if (filt->_perm == NULL)
+        {
+            cfilt_ukf_free(filt);
+            return GSL_ENOMEM;
+        }
+    }
+    else
+    {
+        if (cfilt_permutation_realloc(&filt->_perm, k))
+        {
+            cfilt_ukf_free(filt);
+            return GSL_ENOMEM;
+        }
     }
 
     return GSL_SUCCESS;
@@ -178,7 +185,10 @@ cfilt_ukf_free(cfilt_ukf* filt)
     M_FREE_IF_NOT_NULL(filt->_K_P_z);
     M_FREE_IF_NOT_NULL(filt->_Y_x_Z_u);
 
-    gsl_permutation_free(filt->_perm);
+    if (filt->_perm != NULL)
+    {
+        gsl_permutation_free(filt->_perm);
+    }
 }
 
 int
@@ -189,15 +199,21 @@ cfilt_ukf_predict(cfilt_ukf* filt, void* ptr)
     EXEC_ASSERT(filt->F, filt, ptr);
 
     // x_ = sum_i [mu_weight * Y_i]
-    // TODO : This bit of code could be generalized with a function call
-    gsl_vector_set_zero(filt->x_);
-    for (size_t i = 0; i < filt->gen->points->size1; ++i)
+    if (filt->X_MEAN == NULL)
     {
-        const double weight = gsl_vector_get(filt->gen->mu_weights, i);
-        gsl_vector_view row = gsl_matrix_row(filt->Y, i);
-        gsl_vector* point = &row.vector;
+        gsl_vector_set_zero(filt->x_);
+        for (size_t i = 0; i < filt->gen->points->size1; ++i)
+        {
+            const double weight = gsl_vector_get(filt->gen->mu_weights, i);
+            gsl_vector_view row = gsl_matrix_row(filt->Y, i);
+            gsl_vector* point = &row.vector;
 
-        EXEC_ASSERT(gsl_vector_axpby, weight, point, 1.0, filt->x_);
+            EXEC_ASSERT(gsl_vector_axpby, weight, point, 1.0, filt->x_);
+        }
+    }
+    else
+    {
+        EXEC_ASSERT(filt->X_MEAN, filt->Y, filt->gen, filt->x_, ptr);
     }
 
     // P_ = sum_i [(Y - x_)(Y - x_)^T] + Q
@@ -212,8 +228,17 @@ cfilt_ukf_predict(cfilt_ukf* filt, void* ptr)
         gsl_vector* dst = &dst_row.vector;
 
         EXEC_ASSERT(gsl_vector_memcpy, dst, filt->x_);
-        EXEC_ASSERT(gsl_vector_sub, dst, point);
-        EXEC_ASSERT(gsl_vector_scale, dst, -1);
+
+        if (filt->X_SUB != NULL)
+        {
+            EXEC_ASSERT(filt->X_SUB, filt->dst, filt->point, ptr);
+        }
+        else
+        {
+            EXEC_ASSERT(gsl_vector_sub, dst, point);
+            EXEC_ASSERT(gsl_vector_scale, dst, -1);
+        }
+
         EXEC_ASSERT(gsl_blas_dgemm, CblasTrans, CblasNoTrans, weight,
                     filt->_Y_x, filt->_Y_x, 1, filt->P_);
     }
@@ -228,21 +253,33 @@ cfilt_ukf_update(cfilt_ukf* filt, void* ptr)
     EXEC_ASSERT(filt->H, filt, ptr);
 
     // u_z = sum_i [mu_weight * Z_i]
-    // TODO : This bit of code could be generalized with a function call
-    gsl_vector_set_zero(filt->u_z);
-    for (size_t i = 0; i < filt->gen->points->size1; ++i)
+    if (filt->Z_MEAN == NULL)
     {
-        const double weight = gsl_vector_get(filt->gen->mu_weights, i);
-        gsl_vector_view row = gsl_matrix_row(filt->Z, i);
-        gsl_vector* point = &row.vector;
+        gsl_vector_set_zero(filt->u_z);
+        for (size_t i = 0; i < filt->gen->points->size1; ++i)
+        {
+            const double weight = gsl_vector_get(filt->gen->mu_weights, i);
+            gsl_vector_view row = gsl_matrix_row(filt->Z, i);
+            gsl_vector* point = &row.vector;
 
-        EXEC_ASSERT(gsl_vector_axpby, weight, point, 1.0, filt->u_z);
+            EXEC_ASSERT(gsl_vector_axpby, weight, point, 1.0, filt->u_z);
+        }
+    }
+    else
+    {
+        EXEC_ASSERT(filt->Z_MEAN, filt->Z, filt->gen, filt->u_z, ptr);
     }
 
     // y = z - u_z
-    // TODO : This bit of code could be generalized with a function call
-    EXEC_ASSERT(gsl_vector_memcpy, filt->y, filt->z);
-    EXEC_ASSERT(gsl_vector_sub, filt->y, filt->u_z);
+    if (filt->Y_DIFF == NULL)
+    {
+        EXEC_ASSERT(gsl_vector_memcpy, filt->y, filt->z);
+        EXEC_ASSERT(gsl_vector_sub, filt->y, filt->u_z);
+    }
+    else
+    {
+        EXEC_ASSERT(filt->Y_DIFF, filt->z, filt->u_z, filt->y, ptr);
+    }
 
     // P_z = sum_i [sigma_weight * (z_i - u)(z_i - u)^T] + R
     gsl_matrix_set_zero(filt->P_z);
@@ -256,8 +293,17 @@ cfilt_ukf_update(cfilt_ukf* filt, void* ptr)
         gsl_vector* dst = &dst_row.vector;
 
         EXEC_ASSERT(gsl_vector_memcpy, dst, filt->u_z);
-        EXEC_ASSERT(gsl_vector_sub, dst, point);
-        EXEC_ASSERT(gsl_vector_scale, dst, -1);
+
+        if (filt->Z_DIFF != NULL)
+        {
+            EXEC_ASSERT(filt->Z_DIFF, dst, point, ptr);
+        }
+        else
+        {
+            EXEC_ASSERT(gsl_vector_sub, dst, point);
+            EXEC_ASSERT(gsl_vector_scale, dst, -1);
+        }
+
         EXEC_ASSERT(gsl_blas_dgemm, CblasTrans, CblasNoTrans, weight,
                     filt->_Z_u, filt->_Z_u, 1.0, filt->P_z);
     }
@@ -281,11 +327,25 @@ cfilt_ukf_update(cfilt_ukf* filt, void* ptr)
         EXEC_ASSERT(gsl_vector_memcpy, dst_z, filt->u_z);
         EXEC_ASSERT(gsl_vector_memcpy, dst_y, filt->x_);
 
-        EXEC_ASSERT(gsl_vector_sub, dst_z, point_z);
-        EXEC_ASSERT(gsl_vector_sub, dst_y, point_y);
+        if (X_DIFF != NULL)
+        {
+            EXEC_ASSERT(filt->X_DIFF, dst_y, point_y, ptr);
+        }
+        else
+        {
+            EXEC_ASSERT(gsl_vector_sub, dst_y, point_y);
+            EXEC_ASSERT(gsl_vector_scale, dst_y, -1);
+        }
 
-        EXEC_ASSERT(gsl_vector_scale, dst_z, -1);
-        EXEC_ASSERT(gsl_vector_scale, dst_y, -1);
+        if (Z_DIFF != NULL)
+        {
+            EXEC_ASSERT(filt->Z_DIFF, dst_z, point_z, ptr);
+        }
+        else
+        {
+            EXEC_ASSERT(gsl_vector_sub, dst_z, point_z);
+            EXEC_ASSERT(gsl_vector_scale, dst_z, -1);
+        }
 
         EXEC_ASSERT(gsl_blas_dgemm, CblasTrans, CblasNoTrans, weight,
                     filt->_Y_x, filt->_Z_u, 1.0, filt->_Y_x_Z_u);
@@ -296,10 +356,16 @@ cfilt_ukf_update(cfilt_ukf* filt, void* ptr)
                 filt->_P_z_inv, 0.0, filt->K);
 
     // x = x_ + Ky
-    // TODO : This bit of code could be generalized with a function call
-    EXEC_ASSERT(gsl_vector_memcpy, filt->x, filt->x_);
-    EXEC_ASSERT(gsl_blas_dgemv, CblasNoTrans, 1.0, filt->K, filt->y, 1.0,
-                filt->x);
+    if (filt->X_UPDT == NULL)
+    {
+        EXEC_ASSERT(gsl_vector_memcpy, filt->x, filt->x_);
+        EXEC_ASSERT(gsl_blas_dgemv, CblasNoTrans, 1.0, filt->K, filt->y, 1.0,
+                    filt->x);
+    }
+    else
+    {
+        EXEC_ASSERT(filt->X_UPDT, filt->x_, filt->y, filt->x, ptr);
+    }
 
     // P = P_ - KP_zK^T
     EXEC_ASSERT(gsl_matrix_memcpy, filt->P, filt->P_);

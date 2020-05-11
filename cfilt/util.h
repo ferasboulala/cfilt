@@ -74,6 +74,8 @@
         }                                                                      \
     } while (0);
 
+
+// Matrix functions
 int cfilt_matrix_invert(gsl_matrix* src, gsl_matrix* dst,
                         gsl_permutation* perm);
 
@@ -88,6 +90,7 @@ void cfilt_matrix_var_memcpy(gsl_matrix* src, gsl_matrix* dst);
 
 void cfilt_matrix_realloc(gsl_matrix** b, const size_t n, const size_t m, const int keep_values);
 
+// Vector functions
 int cfilt_vector_cmp(const gsl_vector* a, const gsl_vector* b);
 
 int cfilt_vector_cmp_tol(const gsl_vector* a, const gsl_vector* b,
@@ -97,6 +100,10 @@ void cfilt_vector_var_memcpy(gsl_vector* src, gsl_vector* dst);
 
 void cfilt_vector_realloc(gsl_vector** a, const size_t n, const int keep_values);
 
+// Other
+int cfilt_permutation_realloc(gsl_permutation** p, const size_t n);
+
+// Printing functions
 void cfilt_fprintf_matrix_rows(FILE* file, const gsl_matrix* mat);
 
 void cfilt_fprintf_vector_row(FILE* file, const gsl_vector* vec);

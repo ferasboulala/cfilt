@@ -70,8 +70,13 @@ struct cfilt_ukf
     int (*F)(cfilt_ukf* filt, void* ptr);
     int (*H)(cfilt_ukf* filt, void* ptr);
 
+    // TODO : Change parameters according to usage or don't and let the user get them
     int (*X_MEAN)(cfilt_ukf*, void* ptr);
     int (*Z_MEAN)(cfilt_ukf*, void* ptr);
+    int (*X_UPDT)(cfilt_ukf*, void* ptr);
+    int (*X_DIFF)(cfilt_ukf*, void* ptr);
+    int (*Y_DIFF)(cfilt_ukf*, void* ptr);
+    int (*Z_DIFF)(cfilt_ukf*, void* ptr);
 };
 
 int cfilt_ukf_alloc(cfilt_ukf* filt, const size_t n, const size_t m,

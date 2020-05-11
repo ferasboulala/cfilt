@@ -144,6 +144,25 @@ cfilt_matrix_realloc(gsl_matrix** a, const size_t n, const size_t m, const int k
 }
 
 int
+cfilt_permutation_realloc(gsl_permutation** p, const size_t n)
+{
+    gsl_permutation* p_ = *p;
+    if (p_->size != n)
+    {
+        gsl_permutation* q = gsl_permutation_alloc(n);
+        if (q == NULL)
+        {
+            return GSL_ENOMEM;
+        }
+
+        gsl_permutation_free(p_);
+        *p = q;
+    }
+
+    return GSL_SUCCESS;
+}
+
+int
 cfilt_vector_cmp(const gsl_vector* a, const gsl_vector* b)
 {
     return cfilt_vector_cmp_tol(a, b, 0.0);
